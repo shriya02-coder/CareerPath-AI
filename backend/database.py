@@ -153,7 +153,9 @@ class DatabaseService:
         try:
             career = await self.db.careers.find_one({"_id": ObjectId(career_id)})
             if career:
-                career["id"] = str(career["_id"])
+                career["id"] = str(career.pop("_id"))
+                # Remove any None values and ensure all fields are properly serializable
+                career = {k: v for k, v in career.items() if v is not None}
             return career
         except Exception as e:
             logger.error(f"Error getting career by ID: {str(e)}")
