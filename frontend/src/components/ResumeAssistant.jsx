@@ -18,6 +18,7 @@ import {
   Target
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { resumeAPI } from '../services/api';
 
 const ResumeAssistant = () => {
   const navigate = useNavigate();
@@ -35,66 +36,58 @@ const ResumeAssistant = () => {
     coverLetter: '',
     suggestions: []
   });
+  const [error, setError] = useState('');
 
-  const handleGenerate = (type) => {
+  const handleGenerate = async (type) => {
     setIsGenerating(true);
+    setError('');
     
-    // Simulate AI processing
-    setTimeout(() => {
+    try {
       if (type === 'resume') {
-        setGeneratedContent(prev => ({
-          ...prev,
-          resume: `**OPTIMIZED RESUME SUGGESTIONS**
+        const response = await resumeAPI.optimizeResume({
+          jobTitle: formData.jobTitle,
+          company: formData.company,
+          jobDescription: formData.jobDescription,
+          currentResume: formData.currentResume
+        });
 
-**Professional Summary:**
-Dynamic and results-driven professional with proven expertise in [your field]. Successfully leveraged analytical thinking and collaborative leadership to drive measurable outcomes. Seeking to contribute specialized skills in ${formData.jobTitle} role at ${formData.company}.
-
-**Key Improvements Made:**
-• Enhanced your professional summary to align with the target role
-• Emphasized quantifiable achievements and results
-• Optimized keywords for ATS compatibility
-• Strengthened action verbs and impact statements
-• Tailored experience descriptions to match job requirements
-
-**Recommended Skills to Highlight:**
-• Technical expertise relevant to ${formData.jobTitle}
-• Leadership and team collaboration
-• Data analysis and problem-solving
-• Project management and strategic planning
-• Industry-specific tools and technologies
-
-**Additional Sections to Consider:**
-• Professional certifications
-• Key projects and achievements
-• Technical skills matrix
-• Languages and international experience`
-        }));
+        if (response.success) {
+          setGeneratedContent(prev => ({
+            ...prev,
+            resume: response.optimizedContent,
+            suggestions: response.suggestions
+          }));
+          toast.success('Resume optimization completed!');
+        } else {
+          setError(response.message || 'Failed to optimize resume');
+          toast.error('Failed to optimize resume');
+        }
       } else if (type === 'coverLetter') {
-        setGeneratedContent(prev => ({
-          ...prev,
-          coverLetter: `Dear Hiring Manager,
+        const response = await resumeAPI.generateCoverLetter({
+          jobTitle: formData.jobTitle,
+          company: formData.company,
+          jobDescription: formData.jobDescription,
+          userProfile: null // Could be enhanced to include user profile
+        });
 
-I am writing to express my strong interest in the ${formData.jobTitle} position at ${formData.company}. With my background in [your relevant experience] and passion for [relevant field/industry], I am excited about the opportunity to contribute to your team's continued success.
-
-**Why I'm a Great Fit:**
-In my previous roles, I have successfully [specific achievement that relates to the job]. This experience has equipped me with the skills necessary to excel in this position, particularly in [mention 2-3 key requirements from the job description].
-
-**What I Bring to ${formData.company}:**
-• Proven track record of [relevant achievement]
-• Strong expertise in [relevant skills/technologies]
-• Collaborative approach to problem-solving
-• Commitment to continuous learning and professional growth
-
-I am particularly drawn to ${formData.company} because of [specific reason related to company/mission]. I would welcome the opportunity to discuss how my skills and enthusiasm can contribute to your team's objectives.
-
-Thank you for considering my application. I look forward to hearing from you.
-
-Sincerely,
-[Your Name]`
-        }));
+        if (response.success) {
+          setGeneratedContent(prev => ({
+            ...prev,
+            coverLetter: response.coverLetter
+          }));
+          toast.success('Cover letter generated successfully!');
+        } else {
+          setError(response.message || 'Failed to generate cover letter');
+          toast.error('Failed to generate cover letter');
+        }
       }
+    } catch (error) {
+      console.error(`Error generating ${type}:`, error);
+      setError('Unable to connect to AI service. Please try again.');
+      toast.error(`Unable to generate ${type}. Please check your connection.`);
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
   const copyToClipboard = (content) => {
