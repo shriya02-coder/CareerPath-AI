@@ -6,8 +6,24 @@ import { Textarea } from './ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { ArrowLeft, ArrowRight, Sparkles, Copy, CheckCircle } from 'lucide-react';
-import { skills, experiences, educationLevels, sampleIdentityStatements } from '../data/mock';
 import { toast } from 'sonner';
+import { identityAPI } from '../services/api';
+
+// Import static data that doesn't need backend
+const skills = [
+  "JavaScript", "Python", "React", "Node.js", "SQL", "Machine Learning",
+  "Design Thinking", "Project Management", "Data Analysis", "Communication",
+  "Leadership", "Problem Solving", "Critical Thinking", "Creativity",
+  "Collaboration", "Time Management", "Adaptability", "Customer Service"
+];
+
+const experiences = [
+  "Internship", "Entry Level", "1-2 years", "3-5 years", "5-10 years", "10+ years"
+];
+
+const educationLevels = [
+  "High School", "Associate Degree", "Bachelor's Degree", "Master's Degree", "PhD", "Professional Certification"
+];
 
 const IdentityBuilder = () => {
   const navigate = useNavigate();
@@ -23,6 +39,7 @@ const IdentityBuilder = () => {
   });
   const [generatedStatement, setGeneratedStatement] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSkillToggle = (skill) => {
     setFormData(prev => ({
@@ -33,17 +50,36 @@ const IdentityBuilder = () => {
     }));
   };
 
-  const generateIdentityStatement = () => {
+  const generateIdentityStatement = async () => {
     setIsGenerating(true);
+    setError('');
     
-    // Simulate AI processing
-    setTimeout(() => {
-      const statement = `As a ${formData.currentRole} with ${formData.yearsExperience} of experience and ${formData.education}, I bring a unique combination of ${formData.selectedSkills.slice(0, 3).join(', ')} to drive meaningful impact. My passion for ${formData.interests} and proven track record in ${formData.achievements} positions me to excel in roles that require ${formData.selectedSkills.slice(3, 6).join(', ')}. I am eager to leverage my expertise to ${formData.careerGoals} and contribute to innovative teams that value collaboration and continuous learning.`;
-      
-      setGeneratedStatement(statement);
+    try {
+      const response = await identityAPI.generateStatement({
+        currentRole: formData.currentRole,
+        yearsExperience: formData.yearsExperience,
+        education: formData.education,
+        selectedSkills: formData.selectedSkills,
+        interests: formData.interests,
+        achievements: formData.achievements,
+        careerGoals: formData.careerGoals
+      });
+
+      if (response.success) {
+        setGeneratedStatement(response.statement);
+        setCurrentStep(4);
+        toast.success('Career Identity Statement generated successfully!');
+      } else {
+        setError(response.message || 'Failed to generate statement');
+        toast.error('Failed to generate statement. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error generating identity statement:', error);
+      setError('Unable to connect to AI service. Please try again.');
+      toast.error('Unable to generate statement. Please check your connection.');
+    } finally {
       setIsGenerating(false);
-      setCurrentStep(4);
-    }, 2000);
+    }
   };
 
   const copyToClipboard = () => {
@@ -108,6 +144,13 @@ const IdentityBuilder = () => {
               <p className="text-gray-600">{steps[currentStep - 1].description}</p>
             </div>
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
 
           {/* Step Content */}
           <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
@@ -227,7 +270,7 @@ const IdentityBuilder = () => {
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">Generating your Career Identity Statement</h3>
                       <p className="text-gray-600">Our AI is analyzing your information to create a personalized statement...</p>
                     </div>
-                  ) : (
+                  ) : generatedStatement ? (
                     <div>
                       <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -259,6 +302,22 @@ const IdentityBuilder = () => {
                           <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
                       </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Sparkles className="text-gray-400 h-8 w-8" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Ready to Generate Your Statement</h3>
+                      <p className="text-gray-600 mb-4">Click the button below to create your personalized Career Identity Statement</p>
+                      <Button
+                        onClick={generateIdentityStatement}
+                        disabled={isGenerating}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Generate Statement
+                      </Button>
                     </div>
                   )}
                 </div>

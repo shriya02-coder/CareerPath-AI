@@ -1,0 +1,141 @@
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+// Create axios instance with default config
+const apiClient = axios.create({
+  baseURL: API,
+  timeout: 30000, // 30 seconds timeout for AI operations
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor for logging
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.error('API Response Error:', error);
+    if (error.response?.status === 500) {
+      console.error('Server Error - Check backend logs');
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Career Identity API
+export const identityAPI = {
+  generateStatement: async (identityData) => {
+    try {
+      const response = await apiClient.post('/identity/generate', identityData);
+      return response.data;
+    } catch (error) {
+      console.error('Error generating identity statement:', error);
+      throw error;
+    }
+  }
+};
+
+// Careers API
+export const careersAPI = {
+  getCareers: async (search = '', category = '', limit = 50) => {
+    try {
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (category) params.append('category', category);
+      if (limit) params.append('limit', limit.toString());
+      
+      const response = await apiClient.get(`/careers?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching careers:', error);
+      throw error;
+    }
+  },
+
+  getCareerById: async (careerId) => {
+    try {
+      const response = await apiClient.get(`/careers/${careerId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching career details:', error);
+      throw error;
+    }
+  },
+
+  getCareerCategories: async () => {
+    try {
+      const response = await apiClient.get('/careers/categories');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching career categories:', error);
+      throw error;
+    }
+  },
+
+  getRecommendations: async (userProfile) => {
+    try {
+      const response = await apiClient.post('/careers/recommend', {
+        userProfile: userProfile
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error getting career recommendations:', error);
+      throw error;
+    }
+  }
+};
+
+// Resume Assistant API
+export const resumeAPI = {
+  optimizeResume: async (resumeData) => {
+    try {
+      const response = await apiClient.post('/resume/optimize', resumeData);
+      return response.data;
+    } catch (error) {
+      console.error('Error optimizing resume:', error);
+      throw error;
+    }
+  },
+
+  generateCoverLetter: async (coverLetterData) => {
+    try {
+      const response = await apiClient.post('/resume/cover-letter', coverLetterData);
+      return response.data;
+    } catch (error) {
+      console.error('Error generating cover letter:', error);
+      throw error;
+    }
+  }
+};
+
+// Health check API
+export const healthAPI = {
+  checkStatus: async () => {
+    try {
+      const response = await apiClient.get('/');
+      return response.data;
+    } catch (error) {
+      console.error('Error checking API status:', error);
+      throw error;
+    }
+  }
+};
+
+// Export default API client for custom requests
+export default apiClient;
