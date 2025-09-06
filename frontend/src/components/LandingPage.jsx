@@ -62,9 +62,10 @@ const LandingPage = () => {
                 variant="outline" 
                 size="lg"
                 className="border-purple-200 text-purple-600 hover:bg-purple-50 px-8 py-4 text-lg"
+                onClick={() => navigate('/explore')}
               >
-                <Play className="mr-2 h-5 w-5" />
-                Watch demo
+                Explore Careers
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -74,10 +75,10 @@ const LandingPage = () => {
               <div className="aspect-video bg-white rounded-xl shadow-lg flex items-center justify-center">
                 <div className="text-center space-y-4">
                   <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto">
-                    <Play className="text-white h-6 w-6" />
+                    <Target className="text-white h-6 w-6" />
                   </div>
-                  <p className="text-gray-600">Watch how CareerPath AI works</p>
-                  <p className="text-sm text-gray-500">2:48 duration</p>
+                  <p className="text-gray-600">AI-Powered Career Guidance</p>
+                  <p className="text-sm text-gray-500">Discover your perfect career match</p>
                 </div>
               </div>
             </div>
