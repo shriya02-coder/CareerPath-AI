@@ -2,14 +2,21 @@ import os
 import asyncio
 from typing import List, Dict, Any, Optional
 import logging
-from emergentintegrations import EmergentIntegrations
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 logger = logging.getLogger(__name__)
 
 class AIService:
     def __init__(self):
         self.emergent_key = os.environ.get('EMERGENT_LLM_KEY', 'sk-emergent-c0e1a9a7d2f11A12b4')
-        self.ai_client = EmergentIntegrations(api_key=self.emergent_key)
+    
+    def _get_chat_client(self, system_message: str) -> LlmChat:
+        """Create a new LlmChat client"""
+        return LlmChat(
+            api_key=self.emergent_key,
+            session_id="career_ai_session",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o-mini")
     
     async def generate_career_identity(self, user_data: Dict[str, Any]) -> str:
         """Generate a personalized career identity statement using AI"""
@@ -35,17 +42,10 @@ class AIService:
             Keep it concise but impactful, focusing on what makes them valuable to employers.
             """
             
-            response = await self.ai_client.chat_completion_async(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a professional career counselor and resume writer. Create compelling career identity statements that help job seekers stand out."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=200,
-                temperature=0.7
-            )
+            chat_client = self._get_chat_client("You are a professional career counselor and resume writer. Create compelling career identity statements that help job seekers stand out.")
             
-            return response.choices[0].message.content.strip()
+            response = await chat_client.send_message(UserMessage(text=prompt))
+            return response.strip()
             
         except Exception as e:
             logger.error(f"Error generating career identity: {str(e)}")
@@ -73,17 +73,10 @@ class AIService:
             Format as a structured improvement guide with clear sections.
             """
             
-            response = await self.ai_client.chat_completion_async(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are an expert resume writer and ATS optimization specialist. Provide specific, actionable advice for resume improvement."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.6
-            )
+            chat_client = self._get_chat_client("You are an expert resume writer and ATS optimization specialist. Provide specific, actionable advice for resume improvement.")
             
-            optimization_content = response.choices[0].message.content.strip()
+            response = await chat_client.send_message(UserMessage(text=prompt))
+            optimization_content = response.strip()
             
             # Extract key suggestions
             suggestions = [
@@ -137,17 +130,10 @@ class AIService:
             Format as a complete cover letter with proper structure.
             """
             
-            response = await self.ai_client.chat_completion_async(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a professional career counselor specializing in cover letter writing. Create compelling, personalized cover letters that help candidates stand out."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=400,
-                temperature=0.7
-            )
+            chat_client = self._get_chat_client("You are a professional career counselor specializing in cover letter writing. Create compelling, personalized cover letters that help candidates stand out.")
             
-            return response.choices[0].message.content.strip()
+            response = await chat_client.send_message(UserMessage(text=prompt))
+            return response.strip()
             
         except Exception as e:
             logger.error(f"Error generating cover letter: {str(e)}")
@@ -181,17 +167,11 @@ class AIService:
             Return only the numeric score (0-100).
             """
             
-            response = await self.ai_client.chat_completion_async(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a career matching specialist. Analyze user-career compatibility and provide numeric match scores."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=50,
-                temperature=0.3
-            )
+            chat_client = self._get_chat_client("You are a career matching specialist. Analyze user-career compatibility and provide numeric match scores.")
             
-            score_text = response.choices[0].message.content.strip()
+            response = await chat_client.send_message(UserMessage(text=prompt))
+            score_text = response.strip()
+            
             # Extract numeric score
             import re
             score_match = re.search(r'\d+', score_text)
