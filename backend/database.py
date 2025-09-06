@@ -140,9 +140,11 @@ class DatabaseService:
         cursor = self.db.careers.find(query).limit(limit)
         careers = await cursor.to_list(length=limit)
         
-        # Convert ObjectId to string
+        # Convert ObjectId to string and clean up the data
         for career in careers:
-            career["id"] = str(career["_id"])
+            career["id"] = str(career.pop("_id"))
+            # Remove any None values and ensure all fields are properly serializable
+            career = {k: v for k, v in career.items() if v is not None}
         
         return careers
     
