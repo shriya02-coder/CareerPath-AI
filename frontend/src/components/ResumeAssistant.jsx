@@ -1,0 +1,428 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  FileText, 
+  Sparkles, 
+  Copy, 
+  Download,
+  CheckCircle,
+  Lightbulb,
+  Target
+} from 'lucide-react';
+import { toast } from 'sonner';
+
+const ResumeAssistant = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('resume');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [formData, setFormData] = useState({
+    jobTitle: '',
+    company: '',
+    jobDescription: '',
+    currentResume: '',
+    careerGoals: ''
+  });
+  const [generatedContent, setGeneratedContent] = useState({
+    resume: '',
+    coverLetter: '',
+    suggestions: []
+  });
+
+  const handleGenerate = (type) => {
+    setIsGenerating(true);
+    
+    // Simulate AI processing
+    setTimeout(() => {
+      if (type === 'resume') {
+        setGeneratedContent(prev => ({
+          ...prev,
+          resume: `**OPTIMIZED RESUME SUGGESTIONS**
+
+**Professional Summary:**
+Dynamic and results-driven professional with proven expertise in [your field]. Successfully leveraged analytical thinking and collaborative leadership to drive measurable outcomes. Seeking to contribute specialized skills in ${formData.jobTitle} role at ${formData.company}.
+
+**Key Improvements Made:**
+• Enhanced your professional summary to align with the target role
+• Emphasized quantifiable achievements and results
+• Optimized keywords for ATS compatibility
+• Strengthened action verbs and impact statements
+• Tailored experience descriptions to match job requirements
+
+**Recommended Skills to Highlight:**
+• Technical expertise relevant to ${formData.jobTitle}
+• Leadership and team collaboration
+• Data analysis and problem-solving
+• Project management and strategic planning
+• Industry-specific tools and technologies
+
+**Additional Sections to Consider:**
+• Professional certifications
+• Key projects and achievements
+• Technical skills matrix
+• Languages and international experience`
+        }));
+      } else if (type === 'coverLetter') {
+        setGeneratedContent(prev => ({
+          ...prev,
+          coverLetter: `Dear Hiring Manager,
+
+I am writing to express my strong interest in the ${formData.jobTitle} position at ${formData.company}. With my background in [your relevant experience] and passion for [relevant field/industry], I am excited about the opportunity to contribute to your team's continued success.
+
+**Why I'm a Great Fit:**
+In my previous roles, I have successfully [specific achievement that relates to the job]. This experience has equipped me with the skills necessary to excel in this position, particularly in [mention 2-3 key requirements from the job description].
+
+**What I Bring to ${formData.company}:**
+• Proven track record of [relevant achievement]
+• Strong expertise in [relevant skills/technologies]
+• Collaborative approach to problem-solving
+• Commitment to continuous learning and professional growth
+
+I am particularly drawn to ${formData.company} because of [specific reason related to company/mission]. I would welcome the opportunity to discuss how my skills and enthusiasm can contribute to your team's objectives.
+
+Thank you for considering my application. I look forward to hearing from you.
+
+Sincerely,
+[Your Name]`
+        }));
+      }
+      setIsGenerating(false);
+    }, 2000);
+  };
+
+  const copyToClipboard = (content) => {
+    navigator.clipboard.writeText(content);
+    toast.success('Content copied to clipboard!');
+  };
+
+  const suggestions = [
+    {
+      type: 'improvement',
+      title: 'Quantify Your Achievements',
+      description: 'Add specific numbers, percentages, or metrics to demonstrate your impact.',
+      example: 'Instead of "Improved sales" try "Increased sales by 25% over 6 months"'
+    },
+    {
+      type: 'keyword',
+      title: 'Optimize for ATS',
+      description: 'Include relevant keywords from the job description to pass applicant tracking systems.',
+      example: 'Use exact terms from the job posting like "project management" instead of "managing projects"'
+    },
+    {
+      type: 'action',
+      title: 'Strengthen Action Verbs',
+      description: 'Start bullet points with powerful action verbs to show leadership and initiative.',
+      example: 'Use "Spearheaded," "Orchestrated," "Implemented" instead of "Responsible for"'
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
+      {/* Header */}
+      <header className="px-6 py-4 border-b border-purple-100 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/explore')}
+            className="text-purple-600 hover:text-purple-700"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Explorer
+          </Button>
+          <div className="text-xl font-semibold text-gray-800">Resume & Cover Letter Assistant</div>
+          <Button 
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            onClick={() => navigate('/identity')}
+          >
+            Build Identity
+          </Button>
+        </div>
+      </header>
+
+      <div className="py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              Perfect Your
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                {" "}Application Materials
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Get AI-powered assistance to optimize your resume and craft compelling cover letters 
+              that stand out to hiring managers and pass through ATS systems.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Input Form */}
+            <Card className="lg:col-span-1 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Target className="h-5 w-5 mr-2 text-purple-600" />
+                  Job Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Target Job Title</label>
+                  <Input
+                    placeholder="e.g., Senior UX Designer"
+                    value={formData.jobTitle}
+                    onChange={(e) => setFormData(prev => ({ ...prev, jobTitle: e.target.value }))}
+                    className="border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Company Name</label>
+                  <Input
+                    placeholder="e.g., Google, Microsoft, etc."
+                    value={formData.company}
+                    onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                    className="border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Job Description</label>
+                  <Textarea
+                    placeholder="Paste the job description here to get tailored suggestions..."
+                    value={formData.jobDescription}
+                    onChange={(e) => setFormData(prev => ({ ...prev, jobDescription: e.target.value }))}
+                    className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[120px]"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Current Resume (Optional)</label>
+                  <Textarea
+                    placeholder="Paste your current resume content for optimization..."
+                    value={formData.currentResume}
+                    onChange={(e) => setFormData(prev => ({ ...prev, currentResume: e.target.value }))}
+                    className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[100px]"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Generated Content */}
+            <div className="lg:col-span-2">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3 bg-white shadow-sm">
+                  <TabsTrigger value="resume" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    Resume Optimization
+                  </TabsTrigger>
+                  <TabsTrigger value="cover-letter" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    Cover Letter
+                  </TabsTrigger>
+                  <TabsTrigger value="tips" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    Pro Tips
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="resume">
+                  <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="flex items-center">
+                        <FileText className="h-5 w-5 mr-2 text-purple-600" />
+                        Resume Optimization
+                      </CardTitle>
+                      <Button
+                        onClick={() => handleGenerate('resume')}
+                        disabled={!formData.jobTitle || isGenerating}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Optimize Resume
+                          </>
+                        )}
+                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      {generatedContent.resume ? (
+                        <div className="space-y-4">
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6">
+                            <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+                              {generatedContent.resume}
+                            </pre>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyToClipboard(generatedContent.resume)}
+                              className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                            >
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Export
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-600">
+                            Fill in the job information and click "Optimize Resume" to get AI-powered suggestions.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="cover-letter">
+                  <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="flex items-center">
+                        <FileText className="h-5 w-5 mr-2 text-purple-600" />
+                        Cover Letter Generator
+                      </CardTitle>
+                      <Button
+                        onClick={() => handleGenerate('coverLetter')}
+                        disabled={!formData.jobTitle || !formData.company || isGenerating}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Generate Letter
+                          </>
+                        )}
+                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      {generatedContent.coverLetter ? (
+                        <div className="space-y-4">
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6">
+                            <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+                              {generatedContent.coverLetter}
+                            </pre>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyToClipboard(generatedContent.coverLetter)}
+                              className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                            >
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Export
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-600">
+                            Fill in the job title and company name to generate a personalized cover letter.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="tips">
+                  <div className="space-y-6">
+                    {suggestions.map((suggestion, index) => (
+                      <Card key={index} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                          <div className="flex items-start space-x-4">
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                              <Lightbulb className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                {suggestion.title}
+                              </h3>
+                              <p className="text-gray-600 mb-3">
+                                {suggestion.description}
+                              </p>
+                              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3">
+                                <p className="text-sm text-gray-700">
+                                  <strong>Example:</strong> {suggestion.example}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="mt-16 text-center bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Ready to land your dream job?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Combine your optimized resume with a strong Career Identity Statement 
+              to create a compelling professional narrative.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4"
+                onClick={() => navigate('/identity')}
+              >
+                Build Your Identity
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                className="border-purple-200 text-purple-600 hover:bg-purple-50 px-8 py-4"
+                onClick={() => navigate('/explore')}
+              >
+                Explore More Careers
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ResumeAssistant;
