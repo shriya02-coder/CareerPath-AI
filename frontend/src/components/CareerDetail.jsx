@@ -327,7 +327,7 @@ const CareerDetail = () => {
                 <CardContent className="space-y-3">
                   <Button 
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                    onClick={() => navigate('/resume')}
+                    onClick={() => window.open('/resume', '_blank', 'noopener,noreferrer')}
                   >
                     Optimize Resume
                     <ArrowRight className="ml-2 h-4 w-4" />
