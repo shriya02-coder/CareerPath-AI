@@ -79,12 +79,19 @@ const ResumeAssistant = () => {
     
     try {
       if (type === 'resume') {
+        // Transform jobs with bulletsText into bullets[] for the API
+        const jobsTransformed = (formData.jobs || []).map(j => ({
+          company: j.company,
+          role: j.role,
+          period: j.period,
+          bullets: splitBullets(j.bulletsText)
+        }));
+
         const payload = {
           jobTitle: formData.jobTitle,
           company: formData.company,
           jobDescription: formData.jobDescription,
-          jobs: formData.jobs,
-          // Keep currentResume for backward compatibility if the user pasted into old field
+          jobs: jobsTransformed,
           currentResume: formData.currentResume
         };
         const response = await resumeAPI.optimizeResume(payload);
