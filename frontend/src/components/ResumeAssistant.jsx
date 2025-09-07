@@ -29,14 +29,17 @@ const ResumeAssistant = () => {
     company: '',
     jobDescription: '',
     currentResume: '',
-    careerGoals: ''
+    careerGoals: '',
+    uploadedFile: null
   });
   const [generatedContent, setGeneratedContent] = useState({
     resume: '',
     coverLetter: '',
-    suggestions: []
+    suggestions: [],
+    extractedResumeText: ''
   });
   const [error, setError] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
 
   const handleGenerate = async (type) => {
     setIsGenerating(true);
