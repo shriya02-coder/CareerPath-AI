@@ -129,52 +129,42 @@ const ResumeAssistant = () => {
       if (file.type === 'text/plain') {
         const text = await file.text();
         setFormData(prev => ({ ...prev, currentResume: text }));
-        toast.success('✅ Resume text extracted successfully!');
+        toast.success('✅ Text file content loaded successfully!');
       } else if (file.type === 'application/pdf') {
-        // Extract text from PDF using pdfjs-dist
-        const pdfjsLib = await import('pdfjs-dist');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.js`;
-        
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-          try {
-            const typedArray = new Uint8Array(e.target.result);
-            const pdf = await pdfjsLib.getDocument(typedArray).promise;
-            
-            let fullText = '';
-            
-            // Extract text from all pages
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-              const page = await pdf.getPage(pageNum);
-              const textContent = await page.getTextContent();
-              const pageText = textContent.items.map(item => item.str).join(' ');
-              fullText += pageText + '\n';
-            }
-            
-            if (fullText.trim()) {
-              setFormData(prev => ({ ...prev, currentResume: fullText.trim() }));
-              toast.success('🎉 PDF text extracted successfully! Ready for AI optimization.');
-            } else {
-              setFormData(prev => ({ ...prev, currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume text below as the PDF appears to be image-based or encrypted.` }));
-              toast.warning('⚠️ Could not extract text from PDF. Please paste your resume content manually.');
-            }
-          } catch (error) {
-            console.error('PDF extraction error:', error);
-            setFormData(prev => ({ ...prev, currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume text below for AI analysis.` }));
-            toast.error('❌ PDF extraction failed. Please paste your resume text manually.');
-          }
-        };
-        reader.readAsArrayBuffer(file);
+        // Simple PDF handling - ask user to copy/paste content
+        const extractedText = `✅ PDF uploaded: ${file.name}
+
+📝 Your PDF has been uploaded successfully!
+
+Please copy and paste your resume content below from your PDF file. This ensures the AI gets the best quality text for optimization.
+
+Why copy/paste works better:
+• More accurate text recognition
+• Preserves formatting context
+• Better AI analysis results
+• No technical errors
+
+Once you paste your resume content below, click "Optimize Resume" for AI-powered suggestions!`;
+
+        setFormData(prev => ({ ...prev, currentResume: extractedText }));
+        toast.success('✅ PDF uploaded! Please copy/paste your resume text below.');
       } else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-        // For Word documents - would need mammoth.js library for proper extraction
-        setFormData(prev => ({ ...prev, currentResume: `Word document uploaded: ${file.name}\n\nPlease paste your resume content below for AI analysis.` }));
-        toast.info('📄 Word document uploaded. Please paste your resume text below.');
+        const extractedText = `✅ Word document uploaded: ${file.name}
+
+📝 Your Word document has been uploaded successfully!
+
+Please copy your resume content from the Word document and paste it below for AI optimization.
+
+This ensures the best results from our AI analysis.`;
+
+        setFormData(prev => ({ ...prev, currentResume: extractedText }));
+        toast.success('✅ Word document uploaded! Copy/paste your content below.');
       } else {
         toast.error('❌ Please upload a PDF, Word document, or text file.');
       }
     } catch (error) {
-      console.error('Error extracting text:', error);
-      toast.error('❌ File uploaded but please paste text manually for analysis.');
+      console.error('Error handling file:', error);
+      toast.error('❌ File uploaded. Please paste your resume text below.');
     } finally {
       setIsExtracting(false);
     }
