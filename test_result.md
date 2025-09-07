@@ -143,7 +143,7 @@
 ##     status_history:
 ##         -working: false
 ##         -agent: "main"
-##         -comment: "Rewrote component to remove Unicode bullets and moved parsing to backend via /api/resume/parse"
+##         -comment: "Rewrote component to remove Unicode bullets and moved parsing to backend via /api/resume/parse. Need UI testing next."
 ##   - task: "Use REACT_APP_BACKEND_URL env variable for API calls"
 ##     implemented: true
 ##     working: "NA"
@@ -154,7 +154,7 @@
 ##     status_history:
 ##         -working: false
 ##         -agent: "main"
-##         -comment: "Removed hardcoded http://localhost:8001; now using env var + /api prefix"
+##         -comment: "Removed hardcoded http://localhost:8001; now using env var + /api prefix. Need UI verification."
 ## metadata:
 ##   created_by: "main_agent"
 ##   version: "1.0"
