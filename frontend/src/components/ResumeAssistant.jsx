@@ -80,12 +80,15 @@ const ResumeAssistant = () => {
     
     try {
       if (type === 'resume') {
-        const response = await resumeAPI.optimizeResume({
+        const payload = {
           jobTitle: formData.jobTitle,
           company: formData.company,
           jobDescription: formData.jobDescription,
+          jobs: formData.jobs,
+          // Keep currentResume for backward compatibility if the user pasted into old field
           currentResume: formData.currentResume
-        });
+        };
+        const response = await resumeAPI.optimizeResume(payload);
 
         if (response.success) {
           setGeneratedContent(prev => ({
