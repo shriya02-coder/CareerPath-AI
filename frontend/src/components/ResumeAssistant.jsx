@@ -376,7 +376,6 @@ Our AI will analyze your:
                 </div>
               </CardContent>
             </Card>
-          </div>
 
             {/* Generated Content */}
             <div className="lg:col-span-2">
