@@ -47,26 +47,30 @@ apiClient.interceptors.response.use(
 export const identityAPI = {
   generateStatement: async (identityData) => {
     try {
-      console.log('Making API request to:', `${API}/identity/generate`);
-      console.log('Request data:', identityData);
+      console.log('🚀 Making API request to:', `${API}/identity/generate`);
+      console.log('📊 Request data:', identityData);
       
       const response = await apiClient.post('/identity/generate', identityData);
-      console.log('API response received:', response.data);
+      console.log('✅ API response received:', response.data);
       
       return response.data;
     } catch (error) {
-      console.error('Error generating identity statement:', error);
+      console.error('❌ Error generating identity statement:', error);
       
       // More detailed error logging
       if (error.response) {
-        console.error('Response error:', error.response.status, error.response.data);
+        console.error('❌ Response error:', error.response.status, error.response.data);
+        console.error('❌ Response headers:', error.response.headers);
       } else if (error.request) {
-        console.error('Request error - no response received:', error.request);
+        console.error('❌ Request error - no response received:', error.request);
+        console.error('❌ Request URL:', error.config?.url);
+        console.error('❌ Request method:', error.config?.method);
       } else {
-        console.error('Error message:', error.message);
+        console.error('❌ Error message:', error.message);
       }
       
-      throw error;
+      // Throw a more descriptive error
+      throw new Error(error.response?.data?.message || error.message || 'Failed to connect to AI service');
     }
   }
 };
