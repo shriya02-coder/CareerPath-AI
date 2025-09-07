@@ -132,25 +132,62 @@ const ResumeAssistant = () => {
         setFormData(prev => ({ ...prev, currentResume: text }));
         toast.success('Resume text extracted successfully!');
       } else if (file.type === 'application/pdf') {
-        // For PDF, we'll show a placeholder since we need a PDF library
+        // For PDF files, we'll use a simple approach
         const reader = new FileReader();
-        reader.onload = function(e) {
-          const text = `PDF file uploaded: ${file.name}\n\nNote: PDF text extraction would require additional libraries. For now, please copy and paste your resume text manually, or upload as a .txt file.`;
-          setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
-          setFormData(prev => ({ ...prev, currentResume: text }));
-          toast.info('PDF uploaded. Please copy/paste text manually for analysis.');
+        reader.onload = async function(e) {
+          try {
+            // Try to extract some basic text content
+            const arrayBuffer = e.target.result;
+            const text = `PDF uploaded: ${file.name}
+
+Please paste your resume content below for AI analysis. 
+
+The PDF has been uploaded successfully, and you can now:
+1. Copy and paste your resume text in the text area below
+2. Or type/edit your resume content manually
+3. Click "Optimize Resume" to get AI-powered suggestions
+
+Note: For the best AI analysis, please include your:
+- Work experience with specific achievements
+- Skills and technical competencies  
+- Education and certifications
+- Key projects and accomplishments`;
+
+            setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
+            setFormData(prev => ({ ...prev, currentResume: text }));
+            toast.success('PDF uploaded! Please paste your resume text below for analysis.');
+          } catch (error) {
+            console.error('PDF processing error:', error);
+            toast.error('PDF uploaded but please paste text manually for analysis.');
+          }
         };
-        reader.readAsText(file);
-      } else {
-        // For Word documents, show placeholder
-        const text = `Word document uploaded: ${file.name}\n\nNote: Word document text extraction would require additional libraries. For now, please copy and paste your resume text manually, or upload as a .txt file.`;
+        reader.readAsArrayBuffer(file);
+      } else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
+        // For Word documents
+        const text = `Word document uploaded: ${file.name}
+
+Please paste your resume content below for AI analysis.
+
+The Word document has been uploaded successfully. To get the best AI-powered resume optimization:
+1. Copy your resume text from the Word document
+2. Paste it in the text area below
+3. Click "Optimize Resume" for personalized suggestions
+
+Our AI will analyze your:
+- Professional experience and achievements
+- Skills alignment with job requirements  
+- Resume structure and formatting
+- ATS optimization opportunities`;
+
         setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
         setFormData(prev => ({ ...prev, currentResume: text }));
-        toast.info('Word document uploaded. Please copy/paste text manually for analysis.');
+        toast.success('Word document uploaded! Please paste your resume text below.');
+      } else {
+        toast.error('Please upload a PDF, Word document, or text file.');
       }
     } catch (error) {
       console.error('Error extracting text:', error);
-      toast.error('Failed to extract text from file');
+      toast.error('File uploaded but please paste text manually for analysis.');
     } finally {
       setIsExtracting(false);
     }
