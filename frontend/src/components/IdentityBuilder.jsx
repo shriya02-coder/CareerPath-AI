@@ -137,15 +137,6 @@ const IdentityBuilder = () => {
     }
   };
 
-  const generateFallbackStatement = () => {
-    const role = getCurrentRole();
-    const experience = formData.yearsExperience;
-    const skills = getAllSelectedSkills().slice(0, 3).join(', ');
-    const education = formData.education;
-    
-    return `As a ${experience} ${role} with ${education}, I bring valuable expertise in ${skills}. My professional background and commitment to continuous learning position me well for career advancement. I am eager to leverage my skills and experience to contribute meaningfully to innovative teams and challenging projects that align with my professional aspirations.`;
-  };
-
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedStatement);
     toast.success('Career Identity Statement copied to clipboard!');
