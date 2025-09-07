@@ -296,7 +296,7 @@ const ResumeAssistant = () => {
                       </CardTitle>
                       <Button
                         onClick={() => handleGenerate('resume')}
-                        disabled={!formData.jobTitle || !formData.currentResume || isGenerating}
+                        disabled={!formData.jobTitle || isGenerating}
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                       >
                         {isGenerating ? (
