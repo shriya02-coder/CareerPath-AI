@@ -13,7 +13,8 @@ import {
   Copy, 
   Download,
   Lightbulb,
-  Target
+  Target,
+  Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { resumeAPI } from '../services/api';
