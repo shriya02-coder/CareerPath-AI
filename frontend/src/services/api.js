@@ -6,8 +6,6 @@ const BACKEND_BASE = (
 ) || (typeof process !== 'undefined' && process.env && process.env.REACT_APP_BACKEND_URL) || '';
 
 if (!BACKEND_BASE) {
-  // Log a clear warning in console to aid debugging if env var is missing
-  // Note: Do not hardcode fallback URLs
   // eslint-disable-next-line no-console
   console.warn('REACT_APP_BACKEND_URL is not set. API requests will likely fail.');
 }
@@ -138,7 +136,18 @@ export const resumeAPI = {
     }
   },
 
-  // parseResume no longer used (uploads removed)
+  rewriteBullet: async ({ jobTitle, company, jobDescription, context, original }) => {
+    try {
+      const response = await apiClient.post('/resume/rewrite-bullet', {
+        jobTitle, company, jobDescription, context, original
+      });
+      return response.data;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error rewriting bullet:', error);
+      throw error;
+    }
+  }
 };
 
 // Health check API

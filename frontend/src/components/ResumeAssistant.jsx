@@ -14,7 +14,10 @@ import {
   Download,
   Lightbulb,
   Target,
-  Plus
+  Plus,
+  Check,
+  Info,
+  Wand2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { resumeAPI } from '../services/api';
@@ -23,27 +26,23 @@ const ResumeAssistant = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('resume');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [rewriteLoading, setRewriteLoading] = useState({}); // key: `${jobIdx}-${bulletIdx}`
+  const [rewrites, setRewrites] = useState({}); // { [jobIdx]: { [bulletIdx]: {improved, rationale, keywords} } }
+
   const [formData, setFormData] = useState({
     jobTitle: '',
     company: '',
     jobDescription: '',
-    currentResume: '', // backward compatibility if needed
+    currentResume: '',
     jobs: [
       { company: '', role: '', period: '', bulletsText: '' }
     ],
   });
-  const [generatedContent, setGeneratedContent] = useState({
-    resume: '',
-    coverLetter: '',
-    suggestions: [],
-    bulletEdits: []
-  });
-  const [error, setError] = useState('');
 
   const addJob = () => {
     setFormData(prev => ({
       ...prev,
-      jobs: [...prev.jobs, { company: '', role: '', period: '', bullets: [''] }]
+      jobs: [...prev.jobs, { company: '', role: '', period: '', bulletsText: '' }]
     }));
   };
 
@@ -65,7 +64,6 @@ const ResumeAssistant = () => {
 
   const splitBullets = (text) => {
     if (!text) return [];
-    // Split on newlines, semicolons, or bullets
     return text
       .split(/\n|;|•|\u2022/g)
       .map(s => s.trim())
@@ -73,13 +71,64 @@ const ResumeAssistant = () => {
       .slice(0, 12);
   };
 
+  const handleRewrite = async (jobIdx, bulletIdx, original, context) => {
+    const key = `${jobIdx}-${bulletIdx}`;
+    setRewriteLoading(prev => ({ ...prev, [key]: true }));
+    try {
+      const response = await resumeAPI.rewriteBullet({
+        jobTitle: formData.jobTitle,
+        company: formData.company,
+        jobDescription: formData.jobDescription,
+        context,
+        original
+      });
+      if (response.success) {
+        setRewrites(prev => ({
+          ...prev,
+          [jobIdx]: { ...(prev[jobIdx] || {}), [bulletIdx]: response }
+        }));
+        toast.success('Bullet rewritten');
+      } else {
+        toast.error(response.message || 'Rewrite failed');
+      }
+    } catch (e) {
+      toast.error('Unable to rewrite. Check your connection.');
+    } finally {
+      setRewriteLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const applyRewrite = (jobIdx, bulletIdx) => {
+    const data = rewrites?.[jobIdx]?.[bulletIdx];
+    if (!data?.improved) return;
+    setFormData(prev => {
+      const jobs = [...prev.jobs];
+      const bullets = splitBullets(jobs[jobIdx].bulletsText);
+      bullets[bulletIdx] = data.improved;
+      jobs[jobIdx].bulletsText = bullets.join('\n');
+      return { ...prev, jobs };
+    });
+    toast.success('Applied improved bullet');
+  };
+
+  const [generatedContent, setGeneratedContent] = useState({
+    resume: '',
+    coverLetter: '',
+    suggestions: [],
+    bulletEdits: [],
+    jobEdits: [],
+    optimizedGuide: '',
+    proTips: []
+  });
+
+  const [error, setError] = useState('');
+
   const handleGenerate = async (type) => {
     setIsGenerating(true);
     setError('');
     
     try {
       if (type === 'resume') {
-        // Transform jobs with bulletsText into bullets[] for the API
         const jobsTransformed = (formData.jobs || []).map(j => ({
           company: j.company,
           role: j.role,
@@ -100,8 +149,11 @@ const ResumeAssistant = () => {
           setGeneratedContent(prev => ({
             ...prev,
             resume: response.optimizedContent,
+            optimizedGuide: response.optimizedGuide,
             suggestions: response.suggestions || [],
-            bulletEdits: response.bulletEdits || []
+            bulletEdits: response.bulletEdits || [],
+            jobEdits: response.jobEdits || [],
+            proTips: response.proTips || []
           }));
           toast.success('Resume optimization completed!');
         } else {
@@ -142,27 +194,6 @@ const ResumeAssistant = () => {
     toast.success('Content copied to clipboard!');
   };
 
-  const suggestions = [
-    {
-      type: 'improvement',
-      title: 'Quantify Your Achievements',
-      description: 'Add specific numbers, percentages, or metrics to demonstrate your impact.',
-      example: 'Instead of "Improved sales" try "Increased sales by 25% over 6 months"'
-    },
-    {
-      type: 'keyword',
-      title: 'Optimize for ATS',
-      description: 'Include relevant keywords from the job description to pass applicant tracking systems.',
-      example: 'Use exact terms from the job posting like "project management" instead of "managing projects"'
-    },
-    {
-      type: 'action',
-      title: 'Strengthen Action Verbs',
-      description: 'Start bullet points with powerful action verbs to show leadership and initiative.',
-      example: 'Use "Spearheaded," "Orchestrated," "Implemented" instead of "Responsible for"'
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
       {/* Header */}
@@ -191,18 +222,15 @@ const ResumeAssistant = () => {
           {/* Hero Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Perfect Your
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {" "}Application Materials
-              </span>
+              Sharpen Your Resume, Line by Line
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Paste your resume bullet points below. Our AI will tailor improvements and tips directly on your points for the target job.
+              Paste bullets for each role, then rewrite individual points or optimize everything for your target job.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Paste Section ONLY */}
+            {/* Jobs & Bullets Section */}
             <Card className="lg:col-span-1 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -211,14 +239,16 @@ const ResumeAssistant = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {formData.jobs.map((job, idx) => (
-                  <div key={idx} className="p-4 rounded-lg border border-purple-100 bg-white/70 space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <Input placeholder="Company" value={job.company} onChange={(e) => updateJobField(idx, 'company', e.target.value)} />
-                      <Input placeholder="Role / Title" value={job.role} onChange={(e) => updateJobField(idx, 'role', e.target.value)} />
-                      <Input placeholder="Period (e.g., 2022–Present)" value={job.period || ''} onChange={(e) => updateJobField(idx, 'period', e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
+                {formData.jobs.map((job, idx) => {
+                  const bullets = splitBullets(job.bulletsText);
+                  return (
+                    <div key={idx} className="p-4 rounded-lg border border-purple-100 bg-white/70 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <Input placeholder="Company" value={job.company} onChange={(e) => updateJobField(idx, 'company', e.target.value)} />
+                        <Input placeholder="Role / Title" value={job.role} onChange={(e) => updateJobField(idx, 'role', e.target.value)} />
+                        <Input placeholder="Period (e.g., 2022–Present)" value={job.period || ''} onChange={(e) => updateJobField(idx, 'period', e.target.value)} />
+                      </div>
+
                       <Textarea
                         placeholder={`Paste bullets for ${job.role || 'this role'} (one per line)`}
                         value={job.bulletsText}
@@ -226,9 +256,61 @@ const ResumeAssistant = () => {
                         className="min-h-[120px]"
                       />
                       <div className="text-xs text-gray-500">Tip: Add one bullet per line. You can paste with • or ; as separators too.</div>
+
+                      {bullets.length > 0 && (
+                        <div className="space-y-2">
+                          <div className="text-xs font-medium text-gray-500">Inline rewrites</div>
+                          {bullets.map((b, bIdx) => {
+                            const key = `${idx}-${bIdx}`;
+                            const rewrite = rewrites?.[idx]?.[bIdx];
+                            const loading = !!rewriteLoading[key];
+                            const context = { company: job.company, role: job.role, period: job.period };
+                            return (
+                              <div key={bIdx} className="rounded-lg border border-gray-200 p-3">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="text-sm text-gray-800 flex-1">{b}</div>
+                                  <div className="flex items-center gap-2">
+                                    <Button size="sm" variant="outline" className="border-purple-200 text-purple-600" disabled={loading}
+                                      onClick={() => handleRewrite(idx, bIdx, b, context)}>
+                                      {loading ? (
+                                        <>
+                                          <Sparkles className="h-4 w-4 mr-1 animate-spin" />
+                                          Rewriting
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Wand2 className="h-4 w-4 mr-1" />
+                                          Rewrite
+                                        </>
+                                      )}
+                                    </Button>
+                                    {rewrite?.improved && (
+                                      <Button size="sm" variant="outline" className="border-green-200 text-green-700" onClick={() => applyRewrite(idx, bIdx)}>
+                                        <Check className="h-4 w-4 mr-1" /> Apply
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                                {rewrite?.improved && (
+                                  <div className="mt-3 bg-purple-50 rounded-md p-3">
+                                    <div className="text-xs text-gray-500 mb-1">Improved</div>
+                                    <div className="text-sm text-gray-900 mb-2">{rewrite.improved}</div>
+                                    {rewrite.rationale && (
+                                      <div className="text-xs text-gray-600 mb-1">Why: {rewrite.rationale}</div>
+                                    )}
+                                    {Array.isArray(rewrite.keywords) && rewrite.keywords.length > 0 && (
+                                      <div className="text-xs text-gray-600">Keywords: {rewrite.keywords.join(', ')}</div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <Button variant="outline" onClick={addJob} className="border-purple-200 text-purple-600">
                   <Plus className="h-4 w-4 mr-2" /> Add Job
                 </Button>
@@ -276,7 +358,7 @@ const ResumeAssistant = () => {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-blue-800 text-sm">
-                    💡 <strong>Tip:</strong> Paste concise bullets. The AI will rewrite each line with quantified, role-aligned impact and keyword suggestions.
+                    💡 <strong>Tip:</strong> Use inline Rewrite for key bullets first, then Optimize Resume for a full pass with targeted tips.
                   </p>
                 </div>
               </CardContent>
@@ -323,7 +405,7 @@ const ResumeAssistant = () => {
                       </Button>
                     </CardHeader>
                     <CardContent>
-                      {(generatedContent.resume || generatedContent.optimizedGuide) ? (
+                      {(generatedContent.optimizedGuide || generatedContent.resume) ? (
                         <div className="space-y-8">
                           <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6">
                             <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
@@ -364,7 +446,7 @@ const ResumeAssistant = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => copyToClipboard(generatedContent.resume)}
+                              onClick={() => copyToClipboard(generatedContent.optimizedGuide || generatedContent.resume)}
                               className="border-purple-200 text-purple-600 hover:bg-purple-50"
                             >
                               <Copy className="h-4 w-4 mr-2" />
@@ -384,7 +466,7 @@ const ResumeAssistant = () => {
                         <div className="text-center py-12">
                           <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                           <p className="text-gray-600">
-                            Paste your bullets and job info, then click "Optimize Resume" to get line‑by‑line improvements.
+                            Paste your bullets by job, then click "Optimize Resume" to get line‑by‑line improvements.
                           </p>
                         </div>
                       )}
