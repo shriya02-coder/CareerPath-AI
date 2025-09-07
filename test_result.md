@@ -101,3 +101,67 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+## user_problem_statement: "AI functionalities in Resume Assistant broken; PDF parsing fails in browser; need backend parsing and AI integration working end-to-end. Also fix invalid character compile error in ResumeAssistant.jsx"
+## backend:
+##   - task: "Add /api/resume/parse endpoint with PDF/DOCX/TXT extraction"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: false
+##         -agent: "main"
+##         -comment: "Implemented FastAPI file upload parsing using pypdf and python-docx; need testing"
+##   - task: "Ensure AI optimization endpoints call Emergent LLM and return results"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/backend/ai_service.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: false
+##         -agent: "main"
+##         -comment: "Verify that identity/optimize/cover-letter are hitting real AI (no mocks)"
+## frontend:
+##   - task: "Fix ResumeAssistant.jsx compile/runtime issues and wire to backend parse endpoint"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/components/ResumeAssistant.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: false
+##         -agent: "main"
+##         -comment: "Rewrote component to remove Unicode bullets and moved parsing to backend via /api/resume/parse"
+##   - task: "Use REACT_APP_BACKEND_URL env variable for API calls"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/services/api.js"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: false
+##         -agent: "main"
+##         -comment: "Removed hardcoded http://localhost:8001; now using env var + /api prefix"
+## metadata:
+##   created_by: "main_agent"
+##   version: "1.0"
+##   test_sequence: 1
+##   run_ui: false
+## test_plan:
+##   current_focus:
+##     - "Backend /api/resume/parse upload + extraction"
+##     - "Resume optimization and cover letter hit real AI"
+##   stuck_tasks:
+##     - "None yet"
+##   test_all: false
+##   test_priority: "high_first"
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please test the new /api/resume/parse endpoint with pdf/txt/docx, then test /api/resume/optimize and /api/resume/cover-letter with sample payloads. Verify responses are not mock by checking content variability. After backend passes, I will request to start automated frontend UI tests as approved by user."
