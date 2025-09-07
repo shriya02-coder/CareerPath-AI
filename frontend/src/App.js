@@ -7,6 +7,7 @@ import CareerExplorer from "./components/CareerExplorer";
 import IdentityBuilder from "./components/IdentityBuilder";
 import CareerDetail from "./components/CareerDetail";
 import ResumeAssistant from "./components/ResumeAssistant";
+import TestAI from "./components/TestAI";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/identity" element={<IdentityBuilder />} />
           <Route path="/career/:id" element={<CareerDetail />} />
           <Route path="/resume" element={<ResumeAssistant />} />
+          <Route path="/test-ai" element={<TestAI />} />
         </Routes>
         <Toaster />
       </BrowserRouter>
