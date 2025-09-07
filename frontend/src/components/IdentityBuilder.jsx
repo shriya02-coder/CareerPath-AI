@@ -262,7 +262,7 @@ const IdentityBuilder = () => {
                     <label className="text-sm font-medium text-gray-700 mb-4 block">
                       Select your key skills (choose 3-8 skills)
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                       {skills.map(skill => (
                         <Badge
                           key={skill}
@@ -278,8 +278,48 @@ const IdentityBuilder = () => {
                         </Badge>
                       ))}
                     </div>
+                    
+                    {/* Custom Skills Section */}
+                    <div className="border-t pt-4">
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Add custom skills
+                      </label>
+                      <div className="flex gap-2 mb-3">
+                        <Input
+                          placeholder="Add a skill not listed above"
+                          value={newSkill}
+                          onChange={(e) => setNewSkill(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && addCustomSkill()}
+                          className="flex-1 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                        />
+                        <Button
+                          type="button"
+                          onClick={addCustomSkill}
+                          disabled={!newSkill.trim()}
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                      
+                      {/* Display Custom Skills */}
+                      {formData.customSkills.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {formData.customSkills.map(skill => (
+                            <Badge
+                              key={skill}
+                              className="bg-blue-100 text-blue-800 border-blue-200 cursor-pointer hover:bg-blue-200"
+                              onClick={() => removeCustomSkill(skill)}
+                            >
+                              {skill} ×
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
                     <p className="text-sm text-gray-500 mt-2">
-                      Selected: {formData.selectedSkills.length} skills
+                      Selected: {getAllSelectedSkills().length} skills
                     </p>
                   </div>
 
