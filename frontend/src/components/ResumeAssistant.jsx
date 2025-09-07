@@ -132,62 +132,73 @@ const ResumeAssistant = () => {
         toast.success('✅ Text file loaded successfully!');
       } 
       else if (file.type === 'application/pdf') {
-        // AUTOMATIC PDF TEXT EXTRACTION
-        toast.info('🔄 Extracting text from PDF...');
-        
-        const arrayBuffer = await file.arrayBuffer();
-        
-        try {
-          const pdfData = await pdfParse(arrayBuffer);
-          const extractedText = pdfData.text.trim();
-          
-          if (extractedText && extractedText.length > 50) {
-            setFormData(prev => ({ ...prev, currentResume: extractedText }));
-            toast.success('🎉 PDF text extracted successfully! Ready for AI optimization.');
-          } else {
-            // Fallback for scanned/image PDFs
+        // For now, use FileReader to try basic text extraction
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            // Try to read as text (works for some PDFs)
+            const text = e.target.result;
+            if (text && typeof text === 'string' && text.length > 100) {
+              setFormData(prev => ({ ...prev, currentResume: text }));
+              toast.success('🎉 PDF text extracted successfully!');
+            } else {
+              // PDF is likely binary/encrypted
+              toast.info('📄 PDF uploaded. Attempting advanced extraction...');
+              
+              // Use browser's basic PDF reading capabilities
+              const uint8Array = new Uint8Array(e.target.result);
+              let extractedText = '';
+              
+              // Simple heuristic extraction (works for some PDFs)
+              for (let i = 0; i < uint8Array.length - 4; i++) {
+                const char = String.fromCharCode(uint8Array[i]);
+                if (char >= ' ' && char <= '~') {
+                  extractedText += char;
+                }
+              }
+              
+              // Clean and filter the extracted text
+              const lines = extractedText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 2 && line.length < 200)
+                .filter(line => /[a-zA-Z]/.test(line));
+              
+              const cleanText = lines.join('\n').substring(0, 5000);
+              
+              if (cleanText.length > 100) {
+                setFormData(prev => ({ ...prev, currentResume: cleanText }));
+                toast.success('🎉 PDF text extracted! Review and edit if needed.');
+              } else {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume content below for the best AI analysis.` 
+                }));
+                toast.warning('⚠️ Could not extract text from PDF. Please paste your resume content manually.');
+              }
+            }
+          } catch (error) {
+            console.error('PDF processing error:', error);
             setFormData(prev => ({ 
               ...prev, 
-              currentResume: `PDF processed: ${file.name}\n\nThis appears to be a scanned PDF or image-based document. Please paste your resume text below for the best AI analysis results.` 
+              currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume content below.` 
             }));
-            toast.warning('⚠️ PDF appears to be scanned/image-based. Please paste your resume text below.');
+            toast.warning('⚠️ PDF extraction failed. Please paste your resume text below.');
           }
-        } catch (pdfError) {
-          console.error('PDF parsing error:', pdfError);
-          setFormData(prev => ({ 
-            ...prev, 
-            currentResume: `PDF uploaded: ${file.name}\n\nCouldn't extract text automatically. Please paste your resume content below.` 
-          }));
-          toast.error('❌ PDF text extraction failed. Please paste your resume text below.');
-        }
+        };
+        
+        reader.onerror = () => {
+          toast.error('❌ Could not read PDF file.');
+        };
+        
+        reader.readAsArrayBuffer(file);
       } 
       else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-        // AUTOMATIC WORD DOCUMENT TEXT EXTRACTION
-        toast.info('🔄 Extracting text from Word document...');
-        
-        try {
-          const arrayBuffer = await file.arrayBuffer();
-          const result = await mammoth.extractRawText({ arrayBuffer });
-          const extractedText = result.value.trim();
-          
-          if (extractedText && extractedText.length > 50) {
-            setFormData(prev => ({ ...prev, currentResume: extractedText }));
-            toast.success('🎉 Word document text extracted successfully!');
-          } else {
-            setFormData(prev => ({ 
-              ...prev, 
-              currentResume: `Word document processed: ${file.name}\n\nPlease paste your resume content below for AI analysis.` 
-            }));
-            toast.warning('⚠️ Could not extract text from Word document. Please paste content below.');
-          }
-        } catch (wordError) {
-          console.error('Word extraction error:', wordError);
-          setFormData(prev => ({ 
-            ...prev, 
-            currentResume: `Word document: ${file.name}\n\nPlease paste your resume content below.` 
-          }));
-          toast.error('❌ Word extraction failed. Please paste your resume text below.');
-        }
+        // For Word documents, ask user to paste content
+        setFormData(prev => ({ 
+          ...prev, 
+          currentResume: `Word document uploaded: ${file.name}\n\nPlease paste your resume content below for AI analysis.` 
+        }));
+        toast.info('📄 Word document uploaded. Please paste your resume text below.');
       } 
       else {
         toast.error('❌ Please upload a PDF, Word document, or text file.');
