@@ -1,43 +1,32 @@
 import axios from 'axios';
 
-// HARDCODED backend URL to ensure connection works
-const BACKEND_URL = 'http://localhost:8001';
-const API = `${BACKEND_URL}/api`;
+// FORCE DIRECT CONNECTION - NO ENVIRONMENT VARIABLES
+const API_BASE = 'http://localhost:8001/api';
 
-console.log('🔧 API Configuration (Hardcoded):', { BACKEND_URL, API });
+console.log('🔧 DIRECT API CONNECTION:', API_BASE);
 
-// Create axios instance with default config
+// Create axios instance with direct URL
 const apiClient = axios.create({
-  baseURL: API,
-  timeout: 30000, // 30 seconds timeout for AI operations
+  baseURL: API_BASE,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
-  // Add explicit CORS headers
   withCredentials: false,
 });
 
-// Request interceptor for logging
-apiClient.interceptors.request.use(
-  (config) => {
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    return config;
-  },
-  (error) => {
-    console.error('API Request Error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for error handling
+// Enhanced error handling
 apiClient.interceptors.response.use(
   (response) => {
+    console.log('✅ API Success:', response.config.url, response.data);
     return response;
   },
   (error) => {
-    console.error('API Response Error:', error);
-    if (error.response?.status === 500) {
-      console.error('Server Error - Check backend logs');
+    console.error('❌ API Error:', error.config?.url, error.message);
+    if (error.response) {
+      console.error('❌ Response Error:', error.response.status, error.response.data);
+    } else if (error.request) {
+      console.error('❌ No Response Received:', error.request);
     }
     return Promise.reject(error);
   }
