@@ -182,9 +182,9 @@
 ##   run_ui: true
 ## test_plan:
 ##   current_focus:
-##     - "All frontend tasks tested and working successfully"
+##     - "Updated UI testing completed successfully"
 ##   stuck_tasks:
-##     - "None - all tasks working"
+##     - "/api/careers/categories endpoint returns 404 - prevents category filtering"
 ##   test_all: false
 ##   test_priority: "high_first"
 ## agent_communication:
