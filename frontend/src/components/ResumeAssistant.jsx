@@ -27,7 +27,10 @@ const ResumeAssistant = () => {
     jobTitle: '',
     company: '',
     jobDescription: '',
-    currentResume: '',
+    currentResume: '', // backward compatibility if needed
+    jobs: [
+      { company: '', role: '', period: '', bullets: [''] }
+    ],
   });
   const [generatedContent, setGeneratedContent] = useState({
     resume: '',
