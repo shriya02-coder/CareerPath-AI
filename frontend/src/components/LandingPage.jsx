@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import { ArrowRight, Play, Rocket, Target, TrendingUp } from 'lucide-react';
+import { ArrowRight, Target, Rocket, TrendingUp, FileText } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
