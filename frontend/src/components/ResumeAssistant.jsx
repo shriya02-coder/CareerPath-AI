@@ -55,23 +55,22 @@ const ResumeAssistant = () => {
     });
   };
 
-  const updateBullet = (idx, bIdx, value) => {
+  const updateJobBulletsText = (idx, value) => {
     setFormData(prev => {
       const jobs = [...prev.jobs];
-      const bullets = [...jobs[idx].bullets];
-      bullets[bIdx] = value;
-      jobs[idx] = { ...jobs[idx], bullets };
+      jobs[idx] = { ...jobs[idx], bulletsText: value };
       return { ...prev, jobs };
     });
   };
 
-  const addBullet = (idx) => {
-    setFormData(prev => {
-      const jobs = [...prev.jobs];
-      const bullets = [...jobs[idx].bullets, ''];
-      jobs[idx] = { ...jobs[idx], bullets };
-      return { ...prev, jobs };
-    });
+  const splitBullets = (text) => {
+    if (!text) return [];
+    // Split on newlines, semicolons, or bullets
+    return text
+      .split(/\n|;|•|\u2022/g)
+      .map(s => s.trim())
+      .filter(Boolean)
+      .slice(0, 12);
   };
 
   const handleGenerate = async (type) => {
