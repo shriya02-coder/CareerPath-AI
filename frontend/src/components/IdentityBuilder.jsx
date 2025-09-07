@@ -111,29 +111,27 @@ const IdentityBuilder = () => {
         careerGoals: formData.careerGoals || "Career advancement and skill development"
       };
 
-      console.log('Sending request to API:', requestData);
+      console.log('🚀 Sending request to AI API:', requestData);
+      console.log('🔗 API URL:', 'http://localhost:8001/api/identity/generate');
       
       const response = await identityAPI.generateStatement(requestData);
 
-      console.log('API Response:', response);
+      console.log('✅ AI Response received:', response);
 
       if (response.success) {
         setGeneratedStatement(response.statement);
         setCurrentStep(4);
-        toast.success('Career Identity Statement generated successfully!');
+        toast.success('✨ AI-Generated Career Identity Statement created!');
       } else {
-        throw new Error(response.message || 'Failed to generate statement');
+        setError(`AI Error: ${response.message}`);
+        toast.error(`AI Error: ${response.message}`);
       }
     } catch (error) {
-      console.error('Error generating identity statement:', error);
+      console.error('❌ Error generating identity statement:', error);
+      console.error('❌ Error details:', error.response?.data || error.message);
       
-      // Fallback generation if API fails
-      const fallbackStatement = generateFallbackStatement();
-      setGeneratedStatement(fallbackStatement);
-      setCurrentStep(4);
-      
-      setError('AI service temporarily unavailable. Generated a basic statement based on your input.');
-      toast.error('Using backup generation. AI service will be restored shortly.');
+      setError(`Connection Error: ${error.message}. Please check that the backend is running.`);
+      toast.error(`Connection Error: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }
