@@ -129,7 +129,7 @@ const CareerDetail = () => {
           <div className="text-xl font-semibold text-gray-800">Career Details</div>
           <Button 
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-            onClick={() => navigate('/resume')}
+            onClick={() => window.open('/resume', '_blank', 'noopener,noreferrer')}
           >
             Get Resume Help
           </Button>
