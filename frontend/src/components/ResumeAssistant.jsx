@@ -273,8 +273,51 @@ const ResumeAssistant = () => {
                 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Current Resume (Optional)</label>
+                  
+                  {/* File Upload Area */}
+                  <div 
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors"
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  >
+                    <div className="space-y-2">
+                      <FileText className="mx-auto h-8 w-8 text-gray-400" />
+                      <p className="text-sm text-gray-600">
+                        Drag and drop your resume here, or{' '}
+                        <label className="text-purple-600 hover:text-purple-700 cursor-pointer font-medium">
+                          browse files
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.txt"
+                            onChange={(e) => handleFileUpload(e.target.files[0])}
+                          />
+                        </label>
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Supports PDF, Word documents, and text files (max 10MB)
+                      </p>
+                    </div>
+                    
+                    {formData.uploadedFile && (
+                      <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                        <div className="flex items-center justify-center space-x-2">
+                          <FileText className="h-4 w-4 text-purple-600" />
+                          <span className="text-sm text-purple-700 font-medium">
+                            {formData.uploadedFile.name}
+                          </span>
+                          {isExtracting && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-center text-gray-500 text-sm">or</div>
+                  
                   <Textarea
-                    placeholder="Paste your current resume content for optimization..."
+                    placeholder="Paste your current resume content here for optimization..."
                     value={formData.currentResume}
                     onChange={(e) => setFormData(prev => ({ ...prev, currentResume: e.target.value }))}
                     className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[100px]"
