@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+// HARDCODE the backend URL to fix connection issues
+const BACKEND_URL = 'http://localhost:8001';
 const API = `${BACKEND_URL}/api`;
 
-console.log('API Configuration:', { BACKEND_URL, API, env: process.env.REACT_APP_BACKEND_URL });
+console.log('🔧 API Configuration Fixed:', { BACKEND_URL, API });
 
 // Create axios instance with default config
 const apiClient = axios.create({
