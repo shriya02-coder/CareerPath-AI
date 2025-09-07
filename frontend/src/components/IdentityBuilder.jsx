@@ -337,24 +337,69 @@ const IdentityBuilder = () => {
 
               {currentStep === 3 && (
                 <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p className="text-blue-800 text-sm">
+                      💡 <strong>These fields are optional!</strong> If you're not sure about your goals or interests, you can skip this step. 
+                      CareerPath AI will help you discover them through career exploration.
+                    </p>
+                  </div>
+
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Areas of Interest</label>
+                    <label className="text-sm font-medium text-gray-700">
+                      Areas of Interest <span className="text-gray-400">(Optional)</span>
+                    </label>
                     <Textarea
-                      placeholder="What topics, industries, or types of work excite you most?"
+                      placeholder="What topics, industries, or types of work excite you most? (Leave blank if you're not sure)"
                       value={formData.interests}
                       onChange={(e) => setFormData(prev => ({ ...prev, interests: e.target.value }))}
                       className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[80px]"
                     />
+                    <div className="text-xs text-gray-500">
+                      Examples: Technology innovation, helping people, creative problem-solving, data analysis, team collaboration
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Career Goals</label>
+                    <label className="text-sm font-medium text-gray-700">
+                      Career Goals <span className="text-gray-400">(Optional)</span>
+                    </label>
                     <Textarea
-                      placeholder="What do you hope to achieve in your career? What impact do you want to make?"
+                      placeholder="What do you hope to achieve in your career? What impact do you want to make? (Leave blank if exploring)"
                       value={formData.careerGoals}
                       onChange={(e) => setFormData(prev => ({ ...prev, careerGoals: e.target.value }))}
                       className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[100px]"
                     />
+                    <div className="text-xs text-gray-500">
+                      Examples: Lead a team, work remotely, make a social impact, start my own business, achieve work-life balance
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">Quick Goal Ideas:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[
+                        "Advance to a leadership role",
+                        "Work at a tech startup",
+                        "Make a positive social impact", 
+                        "Achieve better work-life balance",
+                        "Work remotely or freelance",
+                        "Start my own business",
+                        "Learn new technologies",
+                        "Increase my salary significantly"
+                      ].map(goal => (
+                        <button
+                          key={goal}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ 
+                            ...prev, 
+                            careerGoals: prev.careerGoals ? `${prev.careerGoals}, ${goal}` : goal 
+                          }))}
+                          className="text-left p-2 text-sm bg-white border border-gray-200 rounded hover:bg-purple-50 hover:border-purple-300 transition-colors"
+                        >
+                          + {goal}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
