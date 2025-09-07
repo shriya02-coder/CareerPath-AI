@@ -100,31 +100,52 @@ const IdentityBuilder = () => {
     setError('');
     
     try {
-      const response = await identityAPI.generateStatement({
+      // Prepare data with defaults for optional fields
+      const requestData = {
         currentRole: getCurrentRole(),
         yearsExperience: formData.yearsExperience,
         education: formData.education,
         selectedSkills: getAllSelectedSkills(),
-        interests: formData.interests,
-        achievements: formData.achievements,
-        careerGoals: formData.careerGoals
-      });
+        interests: formData.interests || "Professional development and growth",
+        achievements: formData.achievements || "Various professional accomplishments",
+        careerGoals: formData.careerGoals || "Career advancement and skill development"
+      };
+
+      console.log('Sending request to API:', requestData);
+      
+      const response = await identityAPI.generateStatement(requestData);
+
+      console.log('API Response:', response);
 
       if (response.success) {
         setGeneratedStatement(response.statement);
         setCurrentStep(4);
         toast.success('Career Identity Statement generated successfully!');
       } else {
-        setError(response.message || 'Failed to generate statement');
-        toast.error('Failed to generate statement. Please try again.');
+        throw new Error(response.message || 'Failed to generate statement');
       }
     } catch (error) {
       console.error('Error generating identity statement:', error);
-      setError('Unable to connect to AI service. Please try again.');
-      toast.error('Unable to generate statement. Please check your connection.');
+      
+      // Fallback generation if API fails
+      const fallbackStatement = generateFallbackStatement();
+      setGeneratedStatement(fallbackStatement);
+      setCurrentStep(4);
+      
+      setError('AI service temporarily unavailable. Generated a basic statement based on your input.');
+      toast.error('Using backup generation. AI service will be restored shortly.');
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const generateFallbackStatement = () => {
+    const role = getCurrentRole();
+    const experience = formData.yearsExperience;
+    const skills = getAllSelectedSkills().slice(0, 3).join(', ');
+    const education = formData.education;
+    
+    return `As a ${experience} ${role} with ${education}, I bring valuable expertise in ${skills}. My professional background and commitment to continuous learning position me well for career advancement. I am eager to leverage my skills and experience to contribute meaningfully to innovative teams and challenging projects that align with my professional aspirations.`;
   };
 
   const copyToClipboard = () => {
