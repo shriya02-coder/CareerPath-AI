@@ -142,9 +142,7 @@ export const resumeAPI = {
     try {
       const form = new FormData();
       form.append('file', file);
-      const response = await apiClient.post('/resume/parse', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await apiClient.post('/resume/parse', form);
       return response.data;
     } catch (error) {
       // eslint-disable-next-line no-console
