@@ -40,6 +40,40 @@ const ResumeAssistant = () => {
   });
   const [error, setError] = useState('');
 
+  const addJob = () => {
+    setFormData(prev => ({
+      ...prev,
+      jobs: [...prev.jobs, { company: '', role: '', period: '', bullets: [''] }]
+    }));
+  };
+
+  const updateJobField = (idx, field, value) => {
+    setFormData(prev => {
+      const jobs = [...prev.jobs];
+      jobs[idx] = { ...jobs[idx], [field]: value };
+      return { ...prev, jobs };
+    });
+  };
+
+  const updateBullet = (idx, bIdx, value) => {
+    setFormData(prev => {
+      const jobs = [...prev.jobs];
+      const bullets = [...jobs[idx].bullets];
+      bullets[bIdx] = value;
+      jobs[idx] = { ...jobs[idx], bullets };
+      return { ...prev, jobs };
+    });
+  };
+
+  const addBullet = (idx) => {
+    setFormData(prev => {
+      const jobs = [...prev.jobs];
+      const bullets = [...jobs[idx].bullets, ''];
+      jobs[idx] = { ...jobs[idx], bullets };
+      return { ...prev, jobs };
+    });
+  };
+
   const handleGenerate = async (type) => {
     setIsGenerating(true);
     setError('');
