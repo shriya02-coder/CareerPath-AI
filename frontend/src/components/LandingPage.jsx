@@ -23,7 +23,7 @@ const LandingPage = () => {
             <Button 
               variant="outline" 
               className="border-purple-200 text-purple-600 hover:bg-purple-50"
-              onClick={() => navigate('/resume')}
+              onClick={() => window.open('/resume', '_blank', 'noopener,noreferrer')}
             >
               Resume Help
             </Button>
