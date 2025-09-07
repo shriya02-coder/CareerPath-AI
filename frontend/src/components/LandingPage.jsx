@@ -69,10 +69,10 @@ const LandingPage = () => {
                 variant="outline" 
                 size="lg"
                 className="border-purple-200 text-purple-600 hover:bg-purple-50 px-8 py-4 text-lg"
-                onClick={() => navigate('/explore')}
+                onClick={() => navigate('/resume')}
               >
-                Explore Careers
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Resume Help
+                <FileText className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>
