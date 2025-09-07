@@ -300,7 +300,7 @@ const CareerExplorer = () => {
                 size="lg"
                 variant="outline"
                 className="border-purple-200 text-purple-600 hover:bg-purple-50 px-8 py-4"
-                onClick={() => navigate('/resume')}
+                onClick={() => window.open('/resume', '_blank', 'noopener,noreferrer')}
               >
                 Get Resume Help
               </Button>
