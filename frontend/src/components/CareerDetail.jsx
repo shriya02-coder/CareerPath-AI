@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
@@ -14,29 +14,104 @@ import {
   Building,
   MapPin,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Loader
 } from 'lucide-react';
-import { careers } from '../data/mock';
+import { careersAPI } from '../services/api';
+import { toast } from 'sonner';
 
 const CareerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const career = careers.find(c => c.id === parseInt(id));
+  const [career, setCareer] = useState(null);
+  const [relatedCareers, setRelatedCareers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  if (!career) {
+  useEffect(() => {
+    loadCareerDetail();
+  }, [id]);
+
+  const loadCareerDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await careersAPI.getCareerById(id);
+      
+      if (response.success) {
+        setCareer(response.career);
+        // Load related careers if available
+        if (response.career.relatedCareers && response.career.relatedCareers.length > 0) {
+          loadRelatedCareers(response.career.relatedCareers);
+        } else {
+          // If no specific related careers, get some from the same category
+          loadSimilarCareers(response.career.category);
+        }
+        setError('');
+      } else {
+        setError('Career not found');
+      }
+    } catch (error) {
+      console.error('Error loading career detail:', error);
+      setError('Failed to load career details. Please try again.');
+      toast.error('Failed to load career details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadRelatedCareers = async (careerIds) => {
+    try {
+      const relatedData = await Promise.all(
+        careerIds.slice(0, 3).map(async (careerId) => {
+          const response = await careersAPI.getCareerById(careerId);
+          return response.success ? response.career : null;
+        })
+      );
+      setRelatedCareers(relatedData.filter(Boolean));
+    } catch (error) {
+      console.error('Error loading related careers:', error);
+    }
+  };
+
+  const loadSimilarCareers = async (category) => {
+    try {
+      const response = await careersAPI.getCareers('', category, 4);
+      if (response.success) {
+        // Filter out the current career and take up to 3 similar ones
+        const similar = response.careers.filter(c => c.id !== id).slice(0, 3);
+        setRelatedCareers(similar);
+      }
+    } catch (error) {
+      console.error('Error loading similar careers:', error);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Career not found</h2>
+          <Loader className="h-8 w-8 animate-spin text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading career details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !career) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {error || 'Career not found'}
+          </h2>
           <Button onClick={() => navigate('/explore')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Explorer
           </Button>
         </div>
       </div>
     );
   }
-
-  const relatedCareers = careers.filter(c => career.relatedCareers.includes(c.id));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
