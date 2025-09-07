@@ -136,26 +136,26 @@ const ResumeAssistant = () => {
         const reader = new FileReader();
         reader.onload = async function(e) {
           try {
-            // Try to extract some basic text content
-            const arrayBuffer = e.target.result;
-            const text = `PDF uploaded: ${file.name}
+            const text = `✅ PDF uploaded successfully: ${file.name}
 
-Please paste your resume content below for AI analysis. 
+🎯 Ready for AI Analysis!
 
-The PDF has been uploaded successfully, and you can now:
-1. Copy and paste your resume text in the text area below
-2. Or type/edit your resume content manually
-3. Click "Optimize Resume" to get AI-powered suggestions
+Please paste your resume content in the text area below for the best AI-powered optimization:
 
-Note: For the best AI analysis, please include your:
-- Work experience with specific achievements
-- Skills and technical competencies  
-- Education and certifications
-- Key projects and accomplishments`;
+📝 Include these sections for optimal results:
+• Professional Summary/Objective
+• Work Experience with specific achievements  
+• Skills and technical competencies
+• Education and certifications
+• Key projects and accomplishments
+
+💡 Pro tip: The more detailed your resume content, the better our AI can optimize it for your target role!
+
+Click "Optimize Resume" after pasting your content.`;
 
             setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
-            setFormData(prev => ({ ...prev, currentResume: text }));
-            toast.success('PDF uploaded! Please paste your resume text below for analysis.');
+            setFormData(prev => ({ ...prev, currentResume: '' })); // Clear so user must paste
+            toast.success('PDF uploaded! Please paste your resume text below.');
           } catch (error) {
             console.error('PDF processing error:', error);
             toast.error('PDF uploaded but please paste text manually for analysis.');
