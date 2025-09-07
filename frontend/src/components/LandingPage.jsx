@@ -23,6 +23,13 @@ const LandingPage = () => {
             <Button 
               variant="outline" 
               className="border-purple-200 text-purple-600 hover:bg-purple-50"
+              onClick={() => navigate('/resume')}
+            >
+              Resume Help
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-purple-200 text-purple-600 hover:bg-purple-50"
               onClick={() => navigate('/explore')}
             >
               Get Started
