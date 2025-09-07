@@ -1,11 +1,21 @@
 import axios from 'axios';
 
-// FORCE DIRECT CONNECTION - NO ENVIRONMENT VARIABLES
-const API_BASE = 'http://localhost:8001/api';
+// Use environment-configured backend URL exclusively (no hardcoding)
+const BACKEND_BASE = (
+  typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.REACT_APP_BACKEND_URL
+) || (typeof process !== 'undefined' && process.env && process.env.REACT_APP_BACKEND_URL) || '';
 
-console.log('🔧 DIRECT API CONNECTION:', API_BASE);
+if (!BACKEND_BASE) {
+  // Log a clear warning in console to aid debugging if env var is missing
+  // Note: Do not hardcode fallback URLs
+  // eslint-disable-next-line no-console
+  console.warn('REACT_APP_BACKEND_URL is not set. API requests will likely fail.');
+}
 
-// Create axios instance with direct URL
+// All backend routes are prefixed with '/api' per ingress rules
+const API_BASE = `${BACKEND_BASE}/api`;
+
+// Create axios instance with env-based URL
 const apiClient = axios.create({
   baseURL: API_BASE,
   timeout: 30000,
@@ -18,14 +28,18 @@ const apiClient = axios.create({
 // Enhanced error handling
 apiClient.interceptors.response.use(
   (response) => {
+    // eslint-disable-next-line no-console
     console.log('✅ API Success:', response.config.url, response.data);
     return response;
   },
   (error) => {
+    // eslint-disable-next-line no-console
     console.error('❌ API Error:', error.config?.url, error.message);
     if (error.response) {
+      // eslint-disable-next-line no-console
       console.error('❌ Response Error:', error.response.status, error.response.data);
     } else if (error.request) {
+      // eslint-disable-next-line no-console
       console.error('❌ No Response Received:', error.request);
     }
     return Promise.reject(error);
@@ -36,29 +50,11 @@ apiClient.interceptors.response.use(
 export const identityAPI = {
   generateStatement: async (identityData) => {
     try {
-      console.log('🚀 Making API request to:', `${API_BASE}/identity/generate`);
-      console.log('📊 Request data:', identityData);
-      
       const response = await apiClient.post('/identity/generate', identityData);
-      console.log('✅ API response received:', response.data);
-      
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Error generating identity statement:', error);
-      
-      // More detailed error logging
-      if (error.response) {
-        console.error('❌ Response error:', error.response.status, error.response.data);
-        console.error('❌ Response headers:', error.response.headers);
-      } else if (error.request) {
-        console.error('❌ Request error - no response received:', error.request);
-        console.error('❌ Request URL:', error.config?.url);
-        console.error('❌ Request method:', error.config?.method);
-      } else {
-        console.error('❌ Error message:', error.message);
-      }
-      
-      // Throw a more descriptive error
       throw new Error(error.response?.data?.message || error.message || 'Failed to connect to AI service');
     }
   }
@@ -76,6 +72,7 @@ export const careersAPI = {
       const response = await apiClient.get(`/careers?${params.toString()}`);
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error fetching careers:', error);
       throw error;
     }
@@ -86,6 +83,7 @@ export const careersAPI = {
       const response = await apiClient.get(`/careers/${careerId}`);
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error fetching career details:', error);
       throw error;
     }
@@ -96,6 +94,7 @@ export const careersAPI = {
       const response = await apiClient.get('/careers/categories');
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error fetching career categories:', error);
       throw error;
     }
@@ -108,6 +107,7 @@ export const careersAPI = {
       });
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting career recommendations:', error);
       throw error;
     }
@@ -121,6 +121,7 @@ export const resumeAPI = {
       const response = await apiClient.post('/resume/optimize', resumeData);
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error optimizing resume:', error);
       throw error;
     }
@@ -131,7 +132,23 @@ export const resumeAPI = {
       const response = await apiClient.post('/resume/cover-letter', coverLetterData);
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error generating cover letter:', error);
+      throw error;
+    }
+  },
+
+  parseResume: async (file) => {
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const response = await apiClient.post('/resume/parse', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error parsing resume:', error);
       throw error;
     }
   }
@@ -144,6 +161,7 @@ export const healthAPI = {
       const response = await apiClient.get('/');
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error checking API status:', error);
       throw error;
     }

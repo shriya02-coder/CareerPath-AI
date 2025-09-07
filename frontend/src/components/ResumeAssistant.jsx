@@ -13,7 +13,6 @@ import {
   Sparkles, 
   Copy, 
   Download,
-  CheckCircle,
   Lightbulb,
   Target
 } from 'lucide-react';
@@ -29,14 +28,12 @@ const ResumeAssistant = () => {
     company: '',
     jobDescription: '',
     currentResume: '',
-    careerGoals: '',
     uploadedFile: null
   });
   const [generatedContent, setGeneratedContent] = useState({
     resume: '',
     coverLetter: '',
     suggestions: [],
-    extractedResumeText: ''
   });
   const [error, setError] = useState('');
   const [isExtracting, setIsExtracting] = useState(false);
@@ -70,7 +67,7 @@ const ResumeAssistant = () => {
           jobTitle: formData.jobTitle,
           company: formData.company,
           jobDescription: formData.jobDescription,
-          userProfile: null // Could be enhanced to include user profile
+          userProfile: null // TODO: Enhance with user profile when available
         });
 
         if (response.success) {
@@ -85,6 +82,7 @@ const ResumeAssistant = () => {
         }
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Error generating ${type}:`, error);
       setError('Unable to connect to AI service. Please try again.');
       toast.error(`Unable to generate ${type}. Please check your connection.`);
@@ -98,7 +96,7 @@ const ResumeAssistant = () => {
     toast.success('Content copied to clipboard!');
   };
 
-  const handleFileUpload = (file) => {
+  const handleFileUpload = async (file) => {
     if (!file) return;
 
     const validTypes = [
@@ -108,7 +106,7 @@ const ResumeAssistant = () => {
       'text/plain'
     ];
 
-    if (!validTypes.includes(file.type)) {
+    if (!validTypes.includes(file.type) && !/\.(pdf|docx|doc|txt)$/i.test(file.name)) {
       toast.error('Please upload a PDF, Word document, or text file');
       return;
     }
@@ -119,93 +117,23 @@ const ResumeAssistant = () => {
     }
 
     setFormData(prev => ({ ...prev, uploadedFile: file }));
-    extractTextFromFile(file);
+    await extractTextFromFile(file);
   };
 
   const extractTextFromFile = async (file) => {
     setIsExtracting(true);
-    
     try {
-      if (file.type === 'text/plain') {
-        const text = await file.text();
-        setFormData(prev => ({ ...prev, currentResume: text }));
-        toast.success('✅ Text file loaded successfully!');
-      } 
-      else if (file.type === 'application/pdf') {
-        // For now, use FileReader to try basic text extraction
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            // Try to read as text (works for some PDFs)
-            const text = e.target.result;
-            if (text && typeof text === 'string' && text.length > 100) {
-              setFormData(prev => ({ ...prev, currentResume: text }));
-              toast.success('🎉 PDF text extracted successfully!');
-            } else {
-              // PDF is likely binary/encrypted
-              toast.info('📄 PDF uploaded. Attempting advanced extraction...');
-              
-              // Use browser's basic PDF reading capabilities
-              const uint8Array = new Uint8Array(e.target.result);
-              let extractedText = '';
-              
-              // Simple heuristic extraction (works for some PDFs)
-              for (let i = 0; i < uint8Array.length - 4; i++) {
-                const char = String.fromCharCode(uint8Array[i]);
-                if (char >= ' ' && char <= '~') {
-                  extractedText += char;
-                }
-              }
-              
-              // Clean and filter the extracted text
-              const lines = extractedText.split('\n')
-                .map(line => line.trim())
-                .filter(line => line.length > 2 && line.length < 200)
-                .filter(line => /[a-zA-Z]/.test(line));
-              
-              const cleanText = lines.join('\n').substring(0, 5000);
-              
-              if (cleanText.length > 100) {
-                setFormData(prev => ({ ...prev, currentResume: cleanText }));
-                toast.success('🎉 PDF text extracted! Review and edit if needed.');
-              } else {
-                setFormData(prev => ({ 
-                  ...prev, 
-                  currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume content below for the best AI analysis.` 
-                }));
-                toast.warning('⚠️ Could not extract text from PDF. Please paste your resume content manually.');
-              }
-            }
-          } catch (error) {
-            console.error('PDF processing error:', error);
-            setFormData(prev => ({ 
-              ...prev, 
-              currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume content below.` 
-            }));
-            toast.warning('⚠️ PDF extraction failed. Please paste your resume text below.');
-          }
-        };
-        
-        reader.onerror = () => {
-          toast.error('❌ Could not read PDF file.');
-        };
-        
-        reader.readAsArrayBuffer(file);
-      } 
-      else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-        // For Word documents, ask user to paste content
-        setFormData(prev => ({ 
-          ...prev, 
-          currentResume: `Word document uploaded: ${file.name}\n\nPlease paste your resume content below for AI analysis.` 
-        }));
-        toast.info('📄 Word document uploaded. Please paste your resume text below.');
-      } 
-      else {
-        toast.error('❌ Please upload a PDF, Word document, or text file.');
+      const response = await resumeAPI.parseResume(file);
+      if (response.success) {
+        setFormData(prev => ({ ...prev, currentResume: response.extractedText }));
+        toast.success('Resume text extracted successfully!');
+      } else {
+        toast.error(response.message || 'Failed to extract text. Please paste your resume manually.');
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('File processing error:', error);
-      toast.error('❌ File processing failed. Please paste your resume text below.');
+      toast.error('File processing failed. Please paste your resume text below.');
     } finally {
       setIsExtracting(false);
     }
@@ -260,7 +188,7 @@ const ResumeAssistant = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Explorer
           </Button>
-          <div className="text-xl font-semibold text-gray-800">Resume & Cover Letter Assistant</div>
+          <div className="text-xl font-semibold text-gray-800">Resume &amp; Cover Letter Assistant</div>
           <Button 
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             onClick={() => navigate('/identity')}
@@ -542,7 +470,22 @@ const ResumeAssistant = () => {
 
                 <TabsContent value="tips">
                   <div className="space-y-6">
-                    {suggestions.map((suggestion, index) => (
+                    {[{
+                      type: 'improvement',
+                      title: 'Quantify Your Achievements',
+                      description: 'Add specific numbers, percentages, or metrics to demonstrate your impact.',
+                      example: 'Instead of "Improved sales" try "Increased sales by 25% over 6 months"'
+                    },{
+                      type: 'keyword',
+                      title: 'Optimize for ATS',
+                      description: 'Include relevant keywords from the job description to pass applicant tracking systems.',
+                      example: 'Use exact terms from the job posting like "project management" instead of "managing projects"'
+                    },{
+                      type: 'action',
+                      title: 'Strengthen Action Verbs',
+                      description: 'Start bullet points with powerful action verbs to show leadership and initiative.',
+                      example: 'Use "Spearheaded," "Orchestrated," "Implemented" instead of "Responsible for"'
+                    }].map((suggestion, index) => (
                       <Card key={index} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
                         <CardContent className="p-6">
                           <div className="flex items-start space-x-4">

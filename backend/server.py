@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -18,6 +18,19 @@ from models import (
 )
 from database import DatabaseService
 from ai_service import AIService
+
+# New imports for file parsing
+from io import BytesIO
+
+try:
+    from pypdf import PdfReader
+except Exception:
+    PdfReader = None
+
+try:
+    import docx
+except Exception:
+    docx = None
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -125,6 +138,73 @@ async def get_career_categories():
     except Exception as e:
         logger.error(f"Error getting categories: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch career categories")
+
+# Resume parsing endpoint (file upload)
+@api_router.post("/resume/parse")
+async def parse_resume(file: UploadFile = File(...)):
+    """Parse uploaded resume (PDF/DOCX/TXT) and extract plain text"""
+    try:
+        filename = file.filename or "uploaded_file"
+        content_type = file.content_type or "application/octet-stream"
+        raw_bytes = await file.read()
+        text = ""
+
+        # TXT (plain)
+        if content_type.startswith("text/") or filename.lower().endswith((".txt", ".md")):
+            try:
+                text = raw_bytes.decode("utf-8", errors="replace")
+            except Exception:
+                text = raw_bytes.decode("latin-1", errors="replace")
+
+        # PDF
+        elif content_type == "application/pdf" or filename.lower().endswith(".pdf"):
+            if not PdfReader:
+                raise HTTPException(status_code=500, detail="PDF parser not available on server")
+            try:
+                pdf_reader = PdfReader(BytesIO(raw_bytes))
+                pages = []
+                for page in pdf_reader.pages:
+                    try:
+                        pages.append(page.extract_text() or "")
+                    except Exception:
+                        pages.append("")
+                text = "\n".join(pages)
+            except Exception as e:
+                logger.error(f"PDF parse failed: {e}")
+                raise HTTPException(status_code=400, detail="Failed to extract text from PDF. Please upload a text or DOCX version.")
+
+        # DOCX
+        elif (
+            content_type in [
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/msword"
+            ]
+            or filename.lower().endswith(".docx")
+        ):
+            if not docx:
+                raise HTTPException(status_code=500, detail="DOCX parser not available on server")
+            try:
+                document = docx.Document(BytesIO(raw_bytes))
+                text = "\n".join([p.text for p in document.paragraphs])
+            except Exception as e:
+                logger.error(f"DOCX parse failed: {e}")
+                raise HTTPException(status_code=400, detail="Failed to extract text from DOCX. Please upload a text or PDF version.")
+
+        else:
+            raise HTTPException(status_code=415, detail="Unsupported file type. Please upload PDF, DOCX, or TXT.")
+
+        text = (text or "").strip()
+        # Limit overly large payloads
+        if len(text) > 20000:
+            text = text[:20000] + "\n\n[Truncated due to size limit]"
+
+        return {"success": True, "filename": filename, "extractedText": text}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error parsing resume: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal error while parsing resume")
 
 # Resume & Cover Letter Endpoints
 @api_router.post("/resume/optimize", response_model=ResumeOptimizationResponse)
