@@ -204,12 +204,26 @@ const IdentityBuilder = () => {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Current Role or Job Title</label>
-                    <Input
-                      placeholder="e.g., Marketing Coordinator, Student, Career Changer"
+                    <select 
                       value={formData.currentRole}
-                      onChange={(e) => setFormData(prev => ({ ...prev, currentRole: e.target.value }))}
-                      className="border-gray-200 focus:border-purple-500 focus:ring-purple-500"
-                    />
+                      onChange={(e) => setFormData(prev => ({ ...prev, currentRole: e.target.value, customRole: '' }))}
+                      className="w-full p-3 border border-gray-200 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      <option value="">Select your current role</option>
+                      {popularRoles.map(role => (
+                        <option key={role} value={role}>{role}</option>
+                      ))}
+                      <option value="Other">Other (specify below)</option>
+                    </select>
+                    
+                    {formData.currentRole === 'Other' && (
+                      <Input
+                        placeholder="Enter your custom role or job title"
+                        value={formData.customRole}
+                        onChange={(e) => setFormData(prev => ({ ...prev, customRole: e.target.value }))}
+                        className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 mt-2"
+                      />
+                    )}
                   </div>
                   
                   <div className="space-y-2">
