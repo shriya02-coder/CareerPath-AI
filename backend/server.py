@@ -70,34 +70,43 @@ async def generate_identity(request: IdentityGenerationRequest):
 # Careers
 @api_router.get("/careers")
 async def get_careers(search: Optional[str] = None, category: Optional[str] = None, limit: int = 50):
+    """Get careers with optional search and filtering"""
     try:
         careers = await db_service.get_careers(search=search, category=category, limit=limit)
         return {"success": True, "careers": careers, "count": len(careers)}
+        
     except Exception as e:
         logger.error(f"Error getting careers: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch careers")
 
+# Place categories endpoint BEFORE dynamic id route to avoid shadowing
+@api_router.get("/careers/categories")
+async def get_career_categories():
+    """Get all available career categories"""
+    try:
+        categories = await db_service.get_career_categories()
+        logger.info(f"Categories fetched: {categories}")
+        return {"success": True, "categories": categories}
+        
+    except Exception as e:
+        logger.error(f"Error getting categories: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch career categories")
+
 @api_router.get("/careers/{career_id}")
 async def get_career_detail(career_id: str):
+    """Get detailed information about a specific career"""
     try:
         career = await db_service.get_career_by_id(career_id)
         if not career:
             raise HTTPException(status_code=404, detail="Career not found")
+        
         return {"success": True, "career": career}
+        
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting career detail: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch career details")
-
-@api_router.get("/careers/categories")
-async def get_career_categories():
-    try:
-        categories = await db_service.get_career_categories()
-        return {"success": True, "categories": categories}
-    except Exception as e:
-        logger.error(f"Error getting categories: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch career categories")
 
 # Legacy resume parser (frontend no longer uses this)
 @api_router.post("/resume/parse")
