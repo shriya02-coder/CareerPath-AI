@@ -147,6 +147,9 @@
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "TESTED SUCCESSFULLY - ✅ Hero text mentions paste-only and bullets correctly. ✅ Jobs & Resume Bullets card shows required Company/Role/Period inputs and bullet inputs. ✅ +Add Job functionality works (adds new job with all fields). ✅ +Add Bullet functionality works (adds new bullet inputs). ✅ Form filling works for two jobs with multiple bullets each. ✅ Target job information fields work properly. ✅ Optimize Resume generates substantial AI content (224+ chars) with success toast. ✅ Pro Tips tab shows 7 tips with proper UI. All core multi-job functionality working as specified. Minor: Per-job per-bullet improvements section needs backend bulletEdits array structure but doesn't affect core functionality."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "UPDATED UI CONFIRMED - ✅ Jobs & Resume Bullets now uses textarea per job instead of multiple inputs with 'one per line' placeholder. ✅ +Add Job functionality works (job count 10→12). ✅ Successfully filled two jobs with bullets in textarea format. ✅ Target job info works properly. ✅ Optimize Resume generates optimized guide (243 chars AI content). ✅ Pro Tips tab shows 25 tips. All updated UI features working as specified."
 ##   - task: "CareerExplorer: compact search with collapsible filters; clearer copy"
 ##     implemented: true
 ##     working: true
