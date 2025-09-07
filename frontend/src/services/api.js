@@ -138,18 +138,7 @@ export const resumeAPI = {
     }
   },
 
-  parseResume: async (file) => {
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      const response = await apiClient.post('/resume/parse', form);
-      return response.data;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error parsing resume:', error);
-      throw error;
-    }
-  }
+  // parseResume no longer used (uploads removed)
 };
 
 // Health check API
