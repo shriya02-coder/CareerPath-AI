@@ -503,24 +503,40 @@ const IdentityBuilder = () => {
                 Previous
               </Button>
               
-              <Button
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                onClick={() => {
-                  if (currentStep === 3) {
-                    generateIdentityStatement();
-                  } else {
-                    setCurrentStep(currentStep + 1);
+              <div className="flex gap-3">
+                {currentStep === 3 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      // Clear optional fields and proceed
+                      setFormData(prev => ({ ...prev, interests: '', careerGoals: '' }));
+                      generateIdentityStatement();
+                    }}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    Skip & Generate
+                  </Button>
+                )}
+                
+                <Button
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  onClick={() => {
+                    if (currentStep === 3) {
+                      generateIdentityStatement();
+                    } else {
+                      setCurrentStep(currentStep + 1);
+                    }
+                  }}
+                  disabled={
+                    (currentStep === 1 && (!getCurrentRole() || !formData.yearsExperience || !formData.education)) ||
+                    (currentStep === 2 && getAllSelectedSkills().length < 3)
+                    // Step 3 is now optional - no validation needed
                   }
-                }}
-                disabled={
-                  (currentStep === 1 && (!getCurrentRole() || !formData.yearsExperience || !formData.education)) ||
-                  (currentStep === 2 && getAllSelectedSkills().length < 3)
-                  // Step 3 is now optional - no validation needed
-                }
-              >
-                {currentStep === 3 ? 'Generate Statement' : 'Next'}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+                >
+                  {currentStep === 3 ? 'Generate Statement' : 'Next'}
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </div>
           )}
         </div>
