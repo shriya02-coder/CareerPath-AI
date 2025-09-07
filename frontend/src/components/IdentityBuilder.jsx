@@ -14,7 +14,24 @@ const skills = [
   "JavaScript", "Python", "React", "Node.js", "SQL", "Machine Learning",
   "Design Thinking", "Project Management", "Data Analysis", "Communication",
   "Leadership", "Problem Solving", "Critical Thinking", "Creativity",
-  "Collaboration", "Time Management", "Adaptability", "Customer Service"
+  "Collaboration", "Time Management", "Adaptability", "Customer Service",
+  "Marketing", "Sales", "SEO/SEM", "Content Writing", "Social Media",
+  "Financial Analysis", "Strategic Planning", "Team Building", "Negotiation",
+  "Public Speaking", "Research", "Quality Assurance", "DevOps", "Cloud Computing",
+  "Cybersecurity", "UI/UX Design", "Mobile Development", "Database Management",
+  "Business Analysis", "Product Management", "Agile/Scrum", "Digital Marketing",
+  "Graphic Design", "Video Editing", "Photography", "Copywriting"
+];
+
+const popularRoles = [
+  "Software Engineer", "Data Scientist", "Product Manager", "UX/UI Designer",
+  "Marketing Manager", "Sales Representative", "Business Analyst", "Project Manager",
+  "Financial Analyst", "HR Manager", "Operations Manager", "Customer Success Manager",
+  "Content Creator", "Graphic Designer", "DevOps Engineer", "Cybersecurity Analyst",
+  "Frontend Developer", "Backend Developer", "Full Stack Developer", "Mobile Developer",
+  "Data Analyst", "Marketing Specialist", "Social Media Manager", "SEO Specialist",
+  "Account Manager", "Consultant", "Teacher", "Healthcare Professional",
+  "Recent Graduate", "Career Changer", "Freelancer", "Entrepreneur", "Student"
 ];
 
 const experiences = [
