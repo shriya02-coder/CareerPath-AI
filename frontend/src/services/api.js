@@ -42,10 +42,25 @@ apiClient.interceptors.response.use(
 export const identityAPI = {
   generateStatement: async (identityData) => {
     try {
+      console.log('Making API request to:', `${API}/identity/generate`);
+      console.log('Request data:', identityData);
+      
       const response = await apiClient.post('/identity/generate', identityData);
+      console.log('API response received:', response.data);
+      
       return response.data;
     } catch (error) {
       console.error('Error generating identity statement:', error);
+      
+      // More detailed error logging
+      if (error.response) {
+        console.error('Response error:', error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error('Request error - no response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+      
       throw error;
     }
   }
