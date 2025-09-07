@@ -94,6 +94,7 @@ class ResumeOptimizationResponse(BaseModel):
     success: bool
     optimizedContent: str
     suggestions: List[str] = []
+    bulletEdits: List[Dict[str, Any]] = []
     message: Optional[str] = None
 
 class CoverLetterRequest(BaseModel):

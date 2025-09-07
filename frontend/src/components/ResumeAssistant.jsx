@@ -4,7 +4,6 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
-import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { 
   ArrowLeft, 
@@ -28,15 +27,14 @@ const ResumeAssistant = () => {
     company: '',
     jobDescription: '',
     currentResume: '',
-    uploadedFile: null
   });
   const [generatedContent, setGeneratedContent] = useState({
     resume: '',
     coverLetter: '',
     suggestions: [],
+    bulletEdits: []
   });
   const [error, setError] = useState('');
-  const [isExtracting, setIsExtracting] = useState(false);
 
   const handleGenerate = async (type) => {
     setIsGenerating(true);
@@ -55,7 +53,8 @@ const ResumeAssistant = () => {
           setGeneratedContent(prev => ({
             ...prev,
             resume: response.optimizedContent,
-            suggestions: response.suggestions
+            suggestions: response.suggestions || [],
+            bulletEdits: response.bulletEdits || []
           }));
           toast.success('Resume optimization completed!');
         } else {
@@ -67,7 +66,7 @@ const ResumeAssistant = () => {
           jobTitle: formData.jobTitle,
           company: formData.company,
           jobDescription: formData.jobDescription,
-          userProfile: null // TODO: Enhance with user profile when available
+          userProfile: null
         });
 
         if (response.success) {
@@ -94,64 +93,6 @@ const ResumeAssistant = () => {
   const copyToClipboard = (content) => {
     navigator.clipboard.writeText(content);
     toast.success('Content copied to clipboard!');
-  };
-
-  const handleFileUpload = async (file) => {
-    if (!file) return;
-
-    const validTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
-    ];
-
-    if (!validTypes.includes(file.type) && !/\.(pdf|docx|doc|txt)$/i.test(file.name)) {
-      toast.error('Please upload a PDF, Word document, or text file');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      toast.error('File size must be less than 10MB');
-      return;
-    }
-
-    setFormData(prev => ({ ...prev, uploadedFile: file }));
-    await extractTextFromFile(file);
-  };
-
-  const extractTextFromFile = async (file) => {
-    setIsExtracting(true);
-    try {
-      const response = await resumeAPI.parseResume(file);
-      if (response.success) {
-        setFormData(prev => ({ ...prev, currentResume: response.extractedText }));
-        toast.success('Resume text extracted successfully!');
-      } else {
-        toast.error(response.message || 'Failed to extract text. Please paste your resume manually.');
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('File processing error:', error);
-      toast.error('File processing failed. Please paste your resume text below.');
-    } finally {
-      setIsExtracting(false);
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFileUpload(files[0]);
-    }
   };
 
   const suggestions = [
@@ -209,73 +150,30 @@ const ResumeAssistant = () => {
               </span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Get AI-powered assistance to optimize your resume and craft compelling cover letters 
-              that stand out to hiring managers and pass through ATS systems.
+              Paste your resume bullet points below. Our AI will tailor improvements and tips directly on your points for the target job.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* File Upload Section - FIRST */}
+            {/* Paste Section ONLY */}
             <Card className="lg:col-span-1 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="h-5 w-5 mr-2 text-purple-600" />
-                  Upload Your Resume
+                  Paste Your Resume Bullets
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* File Upload Area */}
-                <div 
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors"
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-                  <div className="space-y-2">
-                    <FileText className="mx-auto h-8 w-8 text-gray-400" />
-                    <p className="text-sm text-gray-600">
-                      Drag and drop your resume here, or{' '}
-                      <label className="text-purple-600 hover:text-purple-700 cursor-pointer font-medium">
-                        browse files
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept=".pdf,.doc,.docx,.txt"
-                          onChange={(e) => handleFileUpload(e.target.files[0])}
-                        />
-                      </label>
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Supports PDF, Word documents, and text files (max 10MB)
-                    </p>
-                  </div>
-                  
-                  {formData.uploadedFile && (
-                    <div className="mt-4 p-3 bg-purple-50 rounded-lg">
-                      <div className="flex items-center justify-center space-x-2">
-                        <FileText className="h-4 w-4 text-purple-600" />
-                        <span className="text-sm text-purple-700 font-medium">
-                          {formData.uploadedFile.name}
-                        </span>
-                        {isExtracting && (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="text-center text-gray-500 text-sm">or</div>
-                
                 <Textarea
-                  placeholder="Paste your resume content here..."
+                  placeholder="Paste your resume bullet points here...\nExample:\n• Led migration to cloud, reducing costs by 25%\n• Built React dashboard used by 1,500+ users\n• Mentored 3 engineers and improved sprint velocity by 18%"
                   value={formData.currentResume}
                   onChange={(e) => setFormData(prev => ({ ...prev, currentResume: e.target.value }))}
-                  className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[150px]"
+                  className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[220px]"
                 />
               </CardContent>
             </Card>
 
-            {/* Job Information - SECOND */}
+            {/* Job Information */}
             <Card className="lg:col-span-2 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -316,8 +214,7 @@ const ResumeAssistant = () => {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-blue-800 text-sm">
-                    💡 <strong>Pro Tip:</strong> Upload your resume first, then fill in the job details. 
-                    Our AI will analyze your resume against the specific job requirements for better optimization.
+                    💡 <strong>Tip:</strong> Paste concise bullets. The AI will rewrite each line with quantified, role-aligned impact and keyword suggestions.
                   </p>
                 </div>
               </CardContent>
@@ -347,7 +244,7 @@ const ResumeAssistant = () => {
                       </CardTitle>
                       <Button
                         onClick={() => handleGenerate('resume')}
-                        disabled={!formData.jobTitle || isGenerating}
+                        disabled={!formData.jobTitle || !formData.currentResume || isGenerating}
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                       >
                         {isGenerating ? (
@@ -365,12 +262,35 @@ const ResumeAssistant = () => {
                     </CardHeader>
                     <CardContent>
                       {generatedContent.resume ? (
-                        <div className="space-y-4">
+                        <div className="space-y-8">
                           <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6">
                             <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
                               {generatedContent.resume}
                             </pre>
                           </div>
+
+                          {generatedContent.bulletEdits && generatedContent.bulletEdits.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-3">Per‑bullet improvements</h4>
+                              <div className="space-y-3">
+                                {generatedContent.bulletEdits.map((b, idx) => (
+                                  <div key={idx} className="p-4 rounded-lg border border-purple-100 bg-white/70">
+                                    <div className="text-xs text-gray-500 mb-1">Original</div>
+                                    <div className="text-sm text-gray-700 mb-2">{b.original}</div>
+                                    <div className="text-xs text-gray-500 mb-1">Improved</div>
+                                    <div className="text-sm text-gray-900 mb-2">{b.improved}</div>
+                                    {b.rationale && (
+                                      <div className="text-xs text-gray-600 mb-1">Why: {b.rationale}</div>
+                                    )}
+                                    {Array.isArray(b.keywords) && b.keywords.length > 0 && (
+                                      <div className="text-xs text-gray-600">Keywords: {b.keywords.join(', ')}</div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           <div className="flex gap-2">
                             <Button
                               variant="outline"
@@ -395,7 +315,7 @@ const ResumeAssistant = () => {
                         <div className="text-center py-12">
                           <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                           <p className="text-gray-600">
-                            Fill in the job information and click "Optimize Resume" to get AI-powered suggestions.
+                            Paste your bullets and job info, then click "Optimize Resume" to get line‑by‑line improvements.
                           </p>
                         </div>
                       )}
@@ -486,28 +406,26 @@ const ResumeAssistant = () => {
                       description: 'Start bullet points with powerful action verbs to show leadership and initiative.',
                       example: 'Use "Spearheaded," "Orchestrated," "Implemented" instead of "Responsible for"'
                     }].map((suggestion, index) => (
-                      <Card key={index} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-                        <CardContent className="p-6">
-                          <div className="flex items-start space-x-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                              <Lightbulb className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                {suggestion.title}
-                              </h3>
-                              <p className="text-gray-600 mb-3">
-                                {suggestion.description}
+                      <div key={index} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm rounded-lg p-6">
+                        <div className="flex items-start space-x-4">
+                          <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                            <Lightbulb className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                              {suggestion.title}
+                            </h3>
+                            <p className="text-gray-600 mb-3">
+                              {suggestion.description}
+                            </p>
+                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3">
+                              <p className="text-sm text-gray-700">
+                                <strong>Example:</strong> {suggestion.example}
                               </p>
-                              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3">
-                                <p className="text-sm text-gray-700">
-                                  <strong>Example:</strong> {suggestion.example}
-                                </p>
-                              </div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </TabsContent>

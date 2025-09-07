@@ -2,6 +2,7 @@ import os
 import asyncio
 from typing import List, Dict, Any, Optional
 import logging
+import json
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 logger = logging.getLogger(__name__)
@@ -52,44 +53,71 @@ class AIService:
             return self._fallback_career_identity(user_data)
     
     async def optimize_resume(self, job_info: Dict[str, Any]) -> Dict[str, Any]:
-        """Optimize resume content for a specific job using AI"""
+        """Optimize resume content for a specific job using AI, with per-bullet improvements"""
         try:
+            job_title = job_info.get('jobTitle', 'Professional Role')
+            company = job_info.get('company', 'Target Company')
+            jd = job_info.get('jobDescription', '')
+            resume_text = job_info.get('currentResume', '')
+
             prompt = f"""
-            Analyze this job posting and provide resume optimization suggestions:
-            
-            Job Title: {job_info.get('jobTitle', 'Professional Role')}
-            Company: {job_info.get('company', 'Target Company')}
-            Job Description: {job_info.get('jobDescription', 'Professional role with growth opportunities')}
-            
-            Current Resume: {job_info.get('currentResume', 'No current resume provided')}
-            
-            Provide specific, actionable resume optimization advice including:
-            1. Key skills to highlight based on the job requirements
-            2. How to tailor the professional summary
-            3. Important keywords to include for ATS systems
-            4. Achievement metrics to emphasize
-            5. Specific improvements for better job match
-            
-            Format as a structured improvement guide with clear sections.
+            You are an expert resume writer and ATS optimization specialist.
+
+            TASK: Analyze the user's pasted resume bullet points in relation to the target job and produce:
+            1) optimizedGuide: a concise but actionable improvement guide (markdown ok)
+            2) bulletEdits: an array where each item targets one original bullet/line from the pasted resume and provides:
+               - original: the original bullet text (trimmed)
+               - improved: a stronger, quantified re-write aligned to the job description
+               - rationale: why this change improves impact/ATS match
+               - keywords: a few relevant keywords to include (array of strings)
+
+            INPUTS:
+            - Job Title: {job_title}
+            - Company: {company}
+            - Job Description: {jd}
+            - Current Resume (user pasted content):\n{resume_text}
+
+            RULES:
+            - If the pasted content has lines without dashes/bullets, treat each non-empty line as a bullet candidate
+            - Only include bulletEdits for non-empty meaningful lines (max 10)
+            - Keep improved bullets concise and quantified where possible
+            - Return STRICT JSON with keys: optimizedGuide (string), bulletEdits (array)
+            - Do NOT include any commentary outside JSON. No markdown fences. No extra text.
             """
-            
-            chat_client = self._get_chat_client("You are an expert resume writer and ATS optimization specialist. Provide specific, actionable advice for resume improvement.")
-            
+
+            chat_client = self._get_chat_client("You write precise, structured resume improvements and return strict JSON when asked.")
             response = await chat_client.send_message(UserMessage(text=prompt))
-            optimization_content = response.strip()
+            text = response.strip()
+
+            optimized_content = ""
+            bullet_edits: List[Dict[str, Any]] = []
+            try:
+                data = json.loads(text)
+                optimized_content = data.get("optimizedGuide", "")
+                bullet_edits = data.get("bulletEdits", [])
+            except Exception as parse_err:
+                logger.warning(f"JSON parse failed for resume optimization, returning raw text. Error: {parse_err}")
+                optimized_content = text
+                bullet_edits = []
             
-            # Extract key suggestions
-            suggestions = [
-                "Quantify achievements with specific metrics",
-                "Include relevant keywords from job description",
-                "Tailor professional summary to target role",
-                "Highlight transferable skills",
-                "Use strong action verbs"
-            ]
+            # Dynamic suggestions derived from bullet edits or fallback
+            suggestions: List[str] = []
+            for be in bullet_edits[:5]:
+                if be.get("rationale"):
+                    suggestions.append(be["rationale"][:180])
+            if not suggestions:
+                suggestions = [
+                    "Quantify achievements with specific metrics",
+                    "Include relevant keywords from job description",
+                    "Tailor professional summary to target role",
+                    "Highlight transferable skills",
+                    "Use strong action verbs"
+                ]
             
             return {
-                "optimizedContent": optimization_content,
-                "suggestions": suggestions
+                "optimizedContent": optimized_content or "",
+                "suggestions": suggestions,
+                "bulletEdits": bullet_edits,
             }
             
         except Exception as e:
@@ -221,7 +249,8 @@ Tailor your professional summary to emphasize skills relevant to the {job_title}
                 "Strengthen action verbs",
                 "Highlight relevant skills",
                 "Show career progression"
-            ]
+            ],
+            "bulletEdits": []
         }
     
     def _fallback_cover_letter(self, job_info: Dict[str, Any]) -> str:

@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
-import { ArrowLeft, Search, Filter, TrendingUp, DollarSign, Users, ArrowRight, Loader } from 'lucide-react';
+import { ArrowLeft, Search, TrendingUp, DollarSign, Users, ArrowRight, Loader, SlidersHorizontal } from 'lucide-react';
 import { careersAPI } from '../services/api';
 import { toast } from 'sonner';
 
@@ -17,18 +17,16 @@ const CareerExplorer = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Load careers and categories on component mount
   useEffect(() => {
     loadInitialData();
   }, []);
 
-  // Load careers when search/filter changes
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
       loadCareers();
-    }, 300); // Debounce search
-
+    }, 300);
     return () => clearTimeout(delayedSearch);
   }, [searchTerm, selectedCategory]);
 
@@ -43,7 +41,6 @@ const CareerExplorer = () => {
       if (careersResponse.success) {
         setCareers(careersResponse.careers);
       }
-
       if (categoriesResponse.success) {
         setCategories(categoriesResponse.categories);
       }
@@ -73,8 +70,6 @@ const CareerExplorer = () => {
 
   const filteredCareers = useMemo(() => {
     let filtered = [...careers];
-
-    // Sort careers
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'growth':
@@ -88,7 +83,6 @@ const CareerExplorer = () => {
           return a.title.localeCompare(b.title);
       }
     });
-
     return filtered;
   }, [careers, sortBy]);
 
@@ -129,37 +123,18 @@ const CareerExplorer = () => {
       <div className="py-12 px-6">
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Discover Your
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {" "}Perfect Career Match
-              </span>
+          <div className="text-center mb-10">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
+              Explore Careers That Fit You
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Explore careers that align with your skills, interests, and goals. Use AI-powered insights 
-              to discover opportunities you might never have considered.
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Search roles by skills, interests, and goals. Use filters to narrow by category or sort by growth, salary, or demand.
             </p>
           </div>
 
-          {/* Error Display */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700">{error}</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={loadInitialData}
-                className="mt-2"
-              >
-                Retry
-              </Button>
-            </div>
-          )}
-
           {/* Search and Filters */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
@@ -169,28 +144,38 @@ const CareerExplorer = () => {
                   className="pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
                 />
               </div>
-              
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-200 rounded-md focus:border-purple-500 focus:ring-purple-500"
-              >
-                <option value="">All Categories</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-              
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border border-gray-200 rounded-md focus:border-purple-500 focus:ring-purple-500"
-              >
-                <option value="growth">Growth Rate</option>
-                <option value="salary">Salary</option>
-                <option value="demand">Job Demand</option>
-                <option value="alphabetical">A-Z</option>
-              </select>
+
+              <div>
+                <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="border-purple-200 text-purple-600">
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  {showFilters ? 'Hide Filters' : 'Show Filters'}
+                </Button>
+              </div>
+
+              {showFilters && (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="px-4 py-2 border border-gray-200 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-2 border border-gray-200 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                  >
+                    <option value="growth">Growth Rate</option>
+                    <option value="salary">Salary</option>
+                    <option value="demand">Job Demand</option>
+                    <option value="alphabetical">A-Z</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 
@@ -278,7 +263,7 @@ const CareerExplorer = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No careers found</h3>
               <p className="text-gray-600 mb-4">
-                Try adjusting your search terms or filters to discover more opportunities.
+                Try a different search term or open Filters to refine by category.
               </p>
               <Button
                 variant="outline"
@@ -326,7 +311,5 @@ const CareerExplorer = () => {
     </div>
   );
 };
-
-
 
 export default CareerExplorer;
