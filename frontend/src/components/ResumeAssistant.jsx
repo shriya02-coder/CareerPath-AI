@@ -316,33 +316,40 @@ const ResumeAssistant = () => {
                       </Button>
                     </CardHeader>
                     <CardContent>
-                      {generatedContent.resume ? (
+                      {(generatedContent.resume || generatedContent.optimizedGuide) ? (
                         <div className="space-y-8">
                           <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6">
                             <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
-                              {generatedContent.resume}
+                              {generatedContent.optimizedGuide || generatedContent.resume}
                             </pre>
                           </div>
 
-                          {generatedContent.bulletEdits && generatedContent.bulletEdits.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-3">Per‑bullet improvements</h4>
-                              <div className="space-y-3">
-                                {generatedContent.bulletEdits.map((b, idx) => (
-                                  <div key={idx} className="p-4 rounded-lg border border-purple-100 bg-white/70">
-                                    <div className="text-xs text-gray-500 mb-1">Original</div>
-                                    <div className="text-sm text-gray-700 mb-2">{b.original}</div>
-                                    <div className="text-xs text-gray-500 mb-1">Improved</div>
-                                    <div className="text-sm text-gray-900 mb-2">{b.improved}</div>
-                                    {b.rationale && (
-                                      <div className="text-xs text-gray-600 mb-1">Why: {b.rationale}</div>
-                                    )}
-                                    {Array.isArray(b.keywords) && b.keywords.length > 0 && (
-                                      <div className="text-xs text-gray-600">Keywords: {b.keywords.join(', ')}</div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
+                          {generatedContent.jobEdits && generatedContent.jobEdits.length > 0 && (
+                            <div className="space-y-6">
+                              <h4 className="font-semibold text-gray-900">Per‑job, per‑bullet improvements</h4>
+                              {generatedContent.jobEdits.map((job, jIdx) => (
+                                <div key={jIdx} className="space-y-3">
+                                  {(job.jobInfo?.company || job.jobInfo?.role) && (
+                                    <div className="text-sm text-gray-700 font-medium">
+                                      {job.jobInfo?.role || 'Role'} {job.jobInfo?.company ? `@ ${job.jobInfo.company}` : ''} {job.jobInfo?.period ? `(${job.jobInfo.period})` : ''}
+                                    </div>
+                                  )}
+                                  {(job.bulletEdits || []).map((b, idx) => (
+                                    <div key={idx} className="p-4 rounded-lg border border-purple-100 bg-white/70">
+                                      <div className="text-xs text-gray-500 mb-1">Original</div>
+                                      <div className="text-sm text-gray-700 mb-2">{b.original}</div>
+                                      <div className="text-xs text-gray-500 mb-1">Improved</div>
+                                      <div className="text-sm text-gray-900 mb-2">{b.improved}</div>
+                                      {b.rationale && (
+                                        <div className="text-xs text-gray-600 mb-1">Why: {b.rationale}</div>
+                                      )}
+                                      {Array.isArray(b.keywords) && b.keywords.length > 0 && (
+                                        <div className="text-xs text-gray-600">Keywords: {b.keywords.join(', ')}</div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
                             </div>
                           )}
 
