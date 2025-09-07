@@ -98,6 +98,79 @@ const ResumeAssistant = () => {
     toast.success('Content copied to clipboard!');
   };
 
+  const handleFileUpload = (file) => {
+    if (!file) return;
+
+    const validTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ];
+
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a PDF, Word document, or text file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, uploadedFile: file }));
+    extractTextFromFile(file);
+  };
+
+  const extractTextFromFile = async (file) => {
+    setIsExtracting(true);
+    
+    try {
+      if (file.type === 'text/plain') {
+        const text = await file.text();
+        setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
+        setFormData(prev => ({ ...prev, currentResume: text }));
+        toast.success('Resume text extracted successfully!');
+      } else if (file.type === 'application/pdf') {
+        // For PDF, we'll show a placeholder since we need a PDF library
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const text = `PDF file uploaded: ${file.name}\n\nNote: PDF text extraction would require additional libraries. For now, please copy and paste your resume text manually, or upload as a .txt file.`;
+          setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
+          setFormData(prev => ({ ...prev, currentResume: text }));
+          toast.info('PDF uploaded. Please copy/paste text manually for analysis.');
+        };
+        reader.readAsText(file);
+      } else {
+        // For Word documents, show placeholder
+        const text = `Word document uploaded: ${file.name}\n\nNote: Word document text extraction would require additional libraries. For now, please copy and paste your resume text manually, or upload as a .txt file.`;
+        setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
+        setFormData(prev => ({ ...prev, currentResume: text }));
+        toast.info('Word document uploaded. Please copy/paste text manually for analysis.');
+      }
+    } catch (error) {
+      console.error('Error extracting text:', error);
+      toast.error('Failed to extract text from file');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
   const suggestions = [
     {
       type: 'improvement',
