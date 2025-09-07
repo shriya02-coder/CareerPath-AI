@@ -162,10 +162,10 @@
 ##   run_ui: false
 ## test_plan:
 ##   current_focus:
-##     - "Backend /api/resume/parse upload + extraction"
-##     - "Resume optimization and cover letter hit real AI"
+##     - "Frontend ResumeAssistant.jsx integration testing"
+##     - "Frontend API service integration testing"
 ##   stuck_tasks:
-##     - "None yet"
+##     - "None - backend fully functional"
 ##   test_all: false
 ##   test_priority: "high_first"
 ## agent_communication:
