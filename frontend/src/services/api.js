@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// HARDCODE the backend URL to fix connection issues
+// HARDCODED backend URL to ensure connection works
 const BACKEND_URL = 'http://localhost:8001';
 const API = `${BACKEND_URL}/api`;
 
-console.log('🔧 API Configuration Fixed:', { BACKEND_URL, API });
+console.log('🔧 API Configuration (Hardcoded):', { BACKEND_URL, API });
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -13,6 +13,8 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Add explicit CORS headers
+  withCredentials: false,
 });
 
 // Request interceptor for logging
