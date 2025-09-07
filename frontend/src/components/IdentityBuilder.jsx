@@ -111,12 +111,7 @@ const IdentityBuilder = () => {
         careerGoals: formData.careerGoals || "Career advancement and skill development"
       };
 
-      console.log('🚀 Sending request to AI API:', requestData);
-      console.log('🔗 API URL:', 'http://localhost:8001/api/identity/generate');
-      
       const response = await identityAPI.generateStatement(requestData);
-
-      console.log('✅ AI Response received:', response);
 
       if (response.success) {
         setGeneratedStatement(response.statement);
