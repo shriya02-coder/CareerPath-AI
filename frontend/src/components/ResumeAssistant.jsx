@@ -132,42 +132,72 @@ const ResumeAssistant = () => {
       if (file.type === 'text/plain') {
         const text = await file.text();
         setFormData(prev => ({ ...prev, currentResume: text }));
-        toast.success('✅ Text file content loaded successfully!');
-      } else if (file.type === 'application/pdf') {
-        // Simple PDF handling - ask user to copy/paste content
-        const extractedText = `✅ PDF uploaded: ${file.name}
-
-📝 Your PDF has been uploaded successfully!
-
-Please copy and paste your resume content below from your PDF file. This ensures the AI gets the best quality text for optimization.
-
-Why copy/paste works better:
-• More accurate text recognition
-• Preserves formatting context
-• Better AI analysis results
-• No technical errors
-
-Once you paste your resume content below, click "Optimize Resume" for AI-powered suggestions!`;
-
-        setFormData(prev => ({ ...prev, currentResume: extractedText }));
-        toast.success('✅ PDF uploaded! Please copy/paste your resume text below.');
-      } else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-        const extractedText = `✅ Word document uploaded: ${file.name}
-
-📝 Your Word document has been uploaded successfully!
-
-Please copy your resume content from the Word document and paste it below for AI optimization.
-
-This ensures the best results from our AI analysis.`;
-
-        setFormData(prev => ({ ...prev, currentResume: extractedText }));
-        toast.success('✅ Word document uploaded! Copy/paste your content below.');
-      } else {
+        toast.success('✅ Text file loaded successfully!');
+      } 
+      else if (file.type === 'application/pdf') {
+        // AUTOMATIC PDF TEXT EXTRACTION
+        toast.info('🔄 Extracting text from PDF...');
+        
+        const arrayBuffer = await file.arrayBuffer();
+        
+        try {
+          const pdfData = await pdfParse(arrayBuffer);
+          const extractedText = pdfData.text.trim();
+          
+          if (extractedText && extractedText.length > 50) {
+            setFormData(prev => ({ ...prev, currentResume: extractedText }));
+            toast.success('🎉 PDF text extracted successfully! Ready for AI optimization.');
+          } else {
+            // Fallback for scanned/image PDFs
+            setFormData(prev => ({ 
+              ...prev, 
+              currentResume: `PDF processed: ${file.name}\n\nThis appears to be a scanned PDF or image-based document. Please paste your resume text below for the best AI analysis results.` 
+            }));
+            toast.warning('⚠️ PDF appears to be scanned/image-based. Please paste your resume text below.');
+          }
+        } catch (pdfError) {
+          console.error('PDF parsing error:', pdfError);
+          setFormData(prev => ({ 
+            ...prev, 
+            currentResume: `PDF uploaded: ${file.name}\n\nCouldn't extract text automatically. Please paste your resume content below.` 
+          }));
+          toast.error('❌ PDF text extraction failed. Please paste your resume text below.');
+        }
+      } 
+      else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
+        // AUTOMATIC WORD DOCUMENT TEXT EXTRACTION
+        toast.info('🔄 Extracting text from Word document...');
+        
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          const extractedText = result.value.trim();
+          
+          if (extractedText && extractedText.length > 50) {
+            setFormData(prev => ({ ...prev, currentResume: extractedText }));
+            toast.success('🎉 Word document text extracted successfully!');
+          } else {
+            setFormData(prev => ({ 
+              ...prev, 
+              currentResume: `Word document processed: ${file.name}\n\nPlease paste your resume content below for AI analysis.` 
+            }));
+            toast.warning('⚠️ Could not extract text from Word document. Please paste content below.');
+          }
+        } catch (wordError) {
+          console.error('Word extraction error:', wordError);
+          setFormData(prev => ({ 
+            ...prev, 
+            currentResume: `Word document: ${file.name}\n\nPlease paste your resume content below.` 
+          }));
+          toast.error('❌ Word extraction failed. Please paste your resume text below.');
+        }
+      } 
+      else {
         toast.error('❌ Please upload a PDF, Word document, or text file.');
       }
     } catch (error) {
-      console.error('Error handling file:', error);
-      toast.error('❌ File uploaded. Please paste your resume text below.');
+      console.error('File processing error:', error);
+      toast.error('❌ File processing failed. Please paste your resume text below.');
     } finally {
       setIsExtracting(false);
     }
