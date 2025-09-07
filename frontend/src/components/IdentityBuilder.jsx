@@ -70,6 +70,31 @@ const IdentityBuilder = () => {
     }));
   };
 
+  const addCustomSkill = () => {
+    if (newSkill.trim() && !formData.customSkills.includes(newSkill.trim()) && !formData.selectedSkills.includes(newSkill.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        customSkills: [...prev.customSkills, newSkill.trim()]
+      }));
+      setNewSkill('');
+    }
+  };
+
+  const removeCustomSkill = (skillToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      customSkills: prev.customSkills.filter(skill => skill !== skillToRemove)
+    }));
+  };
+
+  const getAllSelectedSkills = () => {
+    return [...formData.selectedSkills, ...formData.customSkills];
+  };
+
+  const getCurrentRole = () => {
+    return formData.currentRole === 'Other' ? formData.customRole : formData.currentRole;
+  };
+
   const generateIdentityStatement = async () => {
     setIsGenerating(true);
     setError('');
