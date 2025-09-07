@@ -47,9 +47,11 @@ const IdentityBuilder = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     currentRole: '',
+    customRole: '',
     yearsExperience: '',
     education: '',
     selectedSkills: [],
+    customSkills: [],
     interests: '',
     achievements: '',
     careerGoals: ''
@@ -57,6 +59,7 @@ const IdentityBuilder = () => {
   const [generatedStatement, setGeneratedStatement] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [newSkill, setNewSkill] = useState('');
 
   const handleSkillToggle = (skill) => {
     setFormData(prev => ({
