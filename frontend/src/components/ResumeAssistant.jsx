@@ -128,66 +128,53 @@ const ResumeAssistant = () => {
     try {
       if (file.type === 'text/plain') {
         const text = await file.text();
-        setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
         setFormData(prev => ({ ...prev, currentResume: text }));
-        toast.success('Resume text extracted successfully!');
+        toast.success('✅ Resume text extracted successfully!');
       } else if (file.type === 'application/pdf') {
-        // For PDF files, we'll use a simple approach
+        // Extract text from PDF using pdfjs-dist
+        const pdfjsLib = await import('pdfjs-dist');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.js`;
+        
         const reader = new FileReader();
         reader.onload = async function(e) {
           try {
-            const text = `✅ PDF uploaded successfully: ${file.name}
-
-🎯 Ready for AI Analysis!
-
-Please paste your resume content in the text area below for the best AI-powered optimization:
-
-📝 Include these sections for optimal results:
-• Professional Summary/Objective
-• Work Experience with specific achievements  
-• Skills and technical competencies
-• Education and certifications
-• Key projects and accomplishments
-
-💡 Pro tip: The more detailed your resume content, the better our AI can optimize it for your target role!
-
-Click "Optimize Resume" after pasting your content.`;
-
-            setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
-            setFormData(prev => ({ ...prev, currentResume: '' })); // Clear so user must paste
-            toast.success('PDF uploaded! Please paste your resume text below.');
+            const typedArray = new Uint8Array(e.target.result);
+            const pdf = await pdfjsLib.getDocument(typedArray).promise;
+            
+            let fullText = '';
+            
+            // Extract text from all pages
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+              const page = await pdf.getPage(pageNum);
+              const textContent = await page.getTextContent();
+              const pageText = textContent.items.map(item => item.str).join(' ');
+              fullText += pageText + '\n';
+            }
+            
+            if (fullText.trim()) {
+              setFormData(prev => ({ ...prev, currentResume: fullText.trim() }));
+              toast.success('🎉 PDF text extracted successfully! Ready for AI optimization.');
+            } else {
+              setFormData(prev => ({ ...prev, currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume text below as the PDF appears to be image-based or encrypted.` }));
+              toast.warning('⚠️ Could not extract text from PDF. Please paste your resume content manually.');
+            }
           } catch (error) {
-            console.error('PDF processing error:', error);
-            toast.error('PDF uploaded but please paste text manually for analysis.');
+            console.error('PDF extraction error:', error);
+            setFormData(prev => ({ ...prev, currentResume: `PDF uploaded: ${file.name}\n\nPlease paste your resume text below for AI analysis.` }));
+            toast.error('❌ PDF extraction failed. Please paste your resume text manually.');
           }
         };
         reader.readAsArrayBuffer(file);
       } else if (file.type.includes('word') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-        // For Word documents
-        const text = `Word document uploaded: ${file.name}
-
-Please paste your resume content below for AI analysis.
-
-The Word document has been uploaded successfully. To get the best AI-powered resume optimization:
-1. Copy your resume text from the Word document
-2. Paste it in the text area below
-3. Click "Optimize Resume" for personalized suggestions
-
-Our AI will analyze your:
-- Professional experience and achievements
-- Skills alignment with job requirements  
-- Resume structure and formatting
-- ATS optimization opportunities`;
-
-        setGeneratedContent(prev => ({ ...prev, extractedResumeText: text }));
-        setFormData(prev => ({ ...prev, currentResume: text }));
-        toast.success('Word document uploaded! Please paste your resume text below.');
+        // For Word documents - would need mammoth.js library for proper extraction
+        setFormData(prev => ({ ...prev, currentResume: `Word document uploaded: ${file.name}\n\nPlease paste your resume content below for AI analysis.` }));
+        toast.info('📄 Word document uploaded. Please paste your resume text below.');
       } else {
-        toast.error('Please upload a PDF, Word document, or text file.');
+        toast.error('❌ Please upload a PDF, Word document, or text file.');
       }
     } catch (error) {
       console.error('Error extracting text:', error);
-      toast.error('File uploaded but please paste text manually for analysis.');
+      toast.error('❌ File uploaded but please paste text manually for analysis.');
     } finally {
       setIsExtracting(false);
     }
