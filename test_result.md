@@ -133,20 +133,28 @@
 ##         -agent: "testing"
 ##         -comment: "TESTED SUCCESSFULLY - All 3 AI endpoints working: /api/resume/optimize (3131 chars AI content), /api/resume/cover-letter (fallback template but functional), /api/identity/generate (604 chars AI content). Real AI responses confirmed for optimize and identity endpoints. Cover letter uses fallback but still functional. All return success:true with proper content fields."
 ## frontend:
-##   - task: "Fix ResumeAssistant.jsx compile/runtime issues and wire to backend parse endpoint"
+##   - task: "ResumeAssistant: remove file upload & make paste-only; add per-bullet AI edits"
 ##     implemented: true
-##     working: true
+##     working: "NA"
 ##     file: "/app/frontend/src/components/ResumeAssistant.jsx"
 ##     stuck_count: 0
 ##     priority: "high"
-##     needs_retesting: false
+##     needs_retesting: true
 ##     status_history:
 ##         -working: false
 ##         -agent: "main"
-##         -comment: "Rewrote component to remove Unicode bullets and moved parsing to backend via /api/resume/parse. Need UI testing next."
-##         -working: true
-##         -agent: "testing"
-##         -comment: "TESTED SUCCESSFULLY - Complete end-to-end UI flow working. Page loads without errors, navigation via Resume Help button works, file upload implemented (422 error on parse but non-blocking), form filling works, resume optimization generates 3797 chars, cover letter generates 2330 chars, buttons show proper loading states. Minor: File parsing returns 422 error but core functionality works."
+##         -comment: "Removed all upload/parse code; paste-only UX. Backend now returns bulletEdits aligned to pasted points."
+##   - task: "CareerExplorer: compact search with collapsible filters; clearer copy"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/components/CareerExplorer.jsx"
+##     stuck_count: 0
+##     priority: "medium"
+##     needs_retesting: true
+##     status_history:
+##         -working: false
+##         -agent: "main"
+##         -comment: "Simplified UI: main search + Filters button reveals Category & Sort. Hero copy clarified."
 ##   - task: "Use REACT_APP_BACKEND_URL env variable for API calls"
 ##     implemented: true
 ##     working: true
