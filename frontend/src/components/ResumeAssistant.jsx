@@ -198,7 +198,7 @@ const ResumeAssistant = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="h-5 w-5 mr-2 text-purple-600" />
-                  Paste Your Resume Bullets
+                  Jobs & Resume Bullets
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
