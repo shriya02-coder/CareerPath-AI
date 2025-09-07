@@ -202,12 +202,26 @@ const ResumeAssistant = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Textarea
-                  placeholder="Paste your resume bullet points here...\nExample:\n• Led migration to cloud, reducing costs by 25%\n• Built React dashboard used by 1,500+ users\n• Mentored 3 engineers and improved sprint velocity by 18%"
-                  value={formData.currentResume}
-                  onChange={(e) => setFormData(prev => ({ ...prev, currentResume: e.target.value }))}
-                  className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[220px]"
-                />
+                {formData.jobs.map((job, idx) => (
+                  <div key={idx} className="p-4 rounded-lg border border-purple-100 bg-white/70 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <Input placeholder="Company" value={job.company} onChange={(e) => updateJobField(idx, 'company', e.target.value)} />
+                      <Input placeholder="Role / Title" value={job.role} onChange={(e) => updateJobField(idx, 'role', e.target.value)} />
+                      <Input placeholder="Period (e.g., 2022–Present)" value={job.period || ''} onChange={(e) => updateJobField(idx, 'period', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      {job.bullets.map((b, bIdx) => (
+                        <Input key={bIdx} placeholder={`Bullet ${bIdx + 1}`} value={b} onChange={(e) => updateBullet(idx, bIdx, e.target.value)} />
+                      ))}
+                      <Button variant="outline" size="sm" onClick={() => addBullet(idx)} className="border-purple-200 text-purple-600">
+                        <Plus className="h-4 w-4 mr-1" /> Add Bullet
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <Button variant="outline" onClick={addJob} className="border-purple-200 text-purple-600">
+                  <Plus className="h-4 w-4 mr-2" /> Add Job
+                </Button>
               </CardContent>
             </Card>
 
