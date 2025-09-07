@@ -1,20 +1,19 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-import uuid
 from bson import ObjectId
 
 class PyObjectId(ObjectId):
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
-    
+
     @classmethod
     def validate(cls, v):
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid objectid")
         return ObjectId(v)
-    
+
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
@@ -43,7 +42,7 @@ class User(BaseModel):
     savedCareers: List[str] = []
     createdAt: datetime = Field(default_factory=datetime.utcnow)
     updatedAt: datetime = Field(default_factory=datetime.utcnow)
-    
+
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
@@ -63,13 +62,19 @@ class Career(BaseModel):
     jobPostings: int
     companies: List[str]
     createdAt: datetime = Field(default_factory=datetime.utcnow)
-    
+
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-# Request/Response Models
+# Resume Assistant Models
+class JobInput(BaseModel):
+    company: str = ""
+    role: str = ""
+    period: Optional[str] = None
+    bullets: List[str] = []
+
 class IdentityGenerationRequest(BaseModel):
     currentRole: str
     yearsExperience: str
@@ -88,13 +93,17 @@ class ResumeOptimizationRequest(BaseModel):
     jobTitle: str
     company: str
     jobDescription: str
-    currentResume: Optional[str] = None
+    currentResume: Optional[str] = None  # backward compatibility
+    jobs: Optional[List[JobInput]] = None
 
 class ResumeOptimizationResponse(BaseModel):
     success: bool
-    optimizedContent: str
+    optimizedContent: str = ""  # backward compatibility (maps to optimizedGuide)
+    optimizedGuide: Optional[str] = None
     suggestions: List[str] = []
-    bulletEdits: List[Dict[str, Any]] = []
+    bulletEdits: List[Dict[str, Any]] = []  # backward compatibility (flat list)
+    jobEdits: List[Dict[str, Any]] = []  # [{jobIndex, jobInfo, bulletEdits: [...] }]
+    proTips: List[str] = []
     message: Optional[str] = None
 
 class CoverLetterRequest(BaseModel):
@@ -116,4 +125,18 @@ class CareerRecommendationResponse(BaseModel):
     success: bool
     recommendations: List[Dict[str, Any]]
     matchScores: Dict[str, float]
+    message: Optional[str] = None
+
+class RewriteBulletRequest(BaseModel):
+    jobTitle: str
+    company: str
+    jobDescription: str
+    context: Optional[Dict[str, Any]] = None  # {company, role, period}
+    original: str
+
+class RewriteBulletResponse(BaseModel):
+    success: bool
+    improved: str
+    rationale: str
+    keywords: List[str] = []
     message: Optional[str] = None
