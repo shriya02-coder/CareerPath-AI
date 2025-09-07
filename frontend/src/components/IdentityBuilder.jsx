@@ -101,10 +101,10 @@ const IdentityBuilder = () => {
     
     try {
       const response = await identityAPI.generateStatement({
-        currentRole: formData.currentRole,
+        currentRole: getCurrentRole(),
         yearsExperience: formData.yearsExperience,
         education: formData.education,
-        selectedSkills: formData.selectedSkills,
+        selectedSkills: getAllSelectedSkills(),
         interests: formData.interests,
         achievements: formData.achievements,
         careerGoals: formData.careerGoals
