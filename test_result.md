@@ -152,9 +152,9 @@
 ##         -comment: "UPDATED UI CONFIRMED - ✅ Jobs & Resume Bullets now uses textarea per job instead of multiple inputs with 'one per line' placeholder. ✅ +Add Job functionality works (job count 10→12). ✅ Successfully filled two jobs with bullets in textarea format. ✅ Target job info works properly. ✅ Optimize Resume generates optimized guide (243 chars AI content). ✅ Pro Tips tab shows 25 tips. All updated UI features working as specified."
 ##   - task: "CareerExplorer: compact search with collapsible filters; clearer copy"
 ##     implemented: true
-##     working: true
+##     working: false
 ##     file: "/app/frontend/src/components/CareerExplorer.jsx"
-##     stuck_count: 0
+##     stuck_count: 1
 ##     priority: "medium"
 ##     needs_retesting: false
 ##     status_history:
@@ -164,6 +164,9 @@
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "TESTED SUCCESSFULLY - ✅ Hero copy 'Explore Careers That Fit You' is correct with proper description. ✅ Search bar is present and functional. ✅ Filters button reveals Category and Sort dropdowns as expected. ✅ UI loads properly with collapsible filters design. Minor: Search returns 0 results for 'engineer' and /api/careers/categories returns 404, but core UI functionality and design work correctly. The search mechanism and filter UI are properly implemented."
+##         -working: false
+##         -agent: "testing"
+##         -comment: "CRITICAL ISSUE FOUND - ✅ Page loads successfully with correct hero text and UI design. ✅ Loading spinner functionality exists. ✅ Career cards display properly (6 careers loaded). ❌ CRITICAL: /api/careers/categories endpoint returns 404 error preventing category filter testing. Categories dropdown cannot be populated, blocking the core filter functionality. This prevents testing category selection and filtering as requested."
 ##   - task: "Use REACT_APP_BACKEND_URL env variable for API calls"
 ##     implemented: true
 ##     working: true
