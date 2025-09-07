@@ -36,7 +36,7 @@ apiClient.interceptors.response.use(
 export const identityAPI = {
   generateStatement: async (identityData) => {
     try {
-      console.log('🚀 Making API request to:', `${API}/identity/generate`);
+      console.log('🚀 Making API request to:', `${API_BASE}/identity/generate`);
       console.log('📊 Request data:', identityData);
       
       const response = await apiClient.post('/identity/generate', identityData);
