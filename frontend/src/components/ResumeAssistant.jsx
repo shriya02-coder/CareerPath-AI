@@ -269,12 +269,72 @@ Our AI will analyze your:
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Input Form */}
+            {/* File Upload Section - FIRST */}
             <Card className="lg:col-span-1 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-purple-600" />
+                  Upload Your Resume
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* File Upload Area */}
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors"
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
+                  <div className="space-y-2">
+                    <FileText className="mx-auto h-8 w-8 text-gray-400" />
+                    <p className="text-sm text-gray-600">
+                      Drag and drop your resume here, or{' '}
+                      <label className="text-purple-600 hover:text-purple-700 cursor-pointer font-medium">
+                        browse files
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.txt"
+                          onChange={(e) => handleFileUpload(e.target.files[0])}
+                        />
+                      </label>
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Supports PDF, Word documents, and text files (max 10MB)
+                    </p>
+                  </div>
+                  
+                  {formData.uploadedFile && (
+                    <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                      <div className="flex items-center justify-center space-x-2">
+                        <FileText className="h-4 w-4 text-purple-600" />
+                        <span className="text-sm text-purple-700 font-medium">
+                          {formData.uploadedFile.name}
+                        </span>
+                        {isExtracting && (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="text-center text-gray-500 text-sm">or</div>
+                
+                <Textarea
+                  placeholder="Paste your resume content here..."
+                  value={formData.currentResume}
+                  onChange={(e) => setFormData(prev => ({ ...prev, currentResume: e.target.value }))}
+                  className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[150px]"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Job Information - SECOND */}
+            <Card className="lg:col-span-2 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center">
                   <Target className="h-5 w-5 mr-2 text-purple-600" />
-                  Job Information
+                  Target Job Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -307,61 +367,16 @@ Our AI will analyze your:
                     className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[120px]"
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Current Resume (Optional)</label>
-                  
-                  {/* File Upload Area */}
-                  <div 
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors"
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                  >
-                    <div className="space-y-2">
-                      <FileText className="mx-auto h-8 w-8 text-gray-400" />
-                      <p className="text-sm text-gray-600">
-                        Drag and drop your resume here, or{' '}
-                        <label className="text-purple-600 hover:text-purple-700 cursor-pointer font-medium">
-                          browse files
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept=".pdf,.doc,.docx,.txt"
-                            onChange={(e) => handleFileUpload(e.target.files[0])}
-                          />
-                        </label>
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Supports PDF, Word documents, and text files (max 10MB)
-                      </p>
-                    </div>
-                    
-                    {formData.uploadedFile && (
-                      <div className="mt-4 p-3 bg-purple-50 rounded-lg">
-                        <div className="flex items-center justify-center space-x-2">
-                          <FileText className="h-4 w-4 text-purple-600" />
-                          <span className="text-sm text-purple-700 font-medium">
-                            {formData.uploadedFile.name}
-                          </span>
-                          {isExtracting && (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="text-center text-gray-500 text-sm">or</div>
-                  
-                  <Textarea
-                    placeholder="Paste your current resume content here for optimization..."
-                    value={formData.currentResume}
-                    onChange={(e) => setFormData(prev => ({ ...prev, currentResume: e.target.value }))}
-                    className="border-gray-200 focus:border-purple-500 focus:ring-purple-500 min-h-[100px]"
-                  />
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-800 text-sm">
+                    💡 <strong>Pro Tip:</strong> Upload your resume first, then fill in the job details. 
+                    Our AI will analyze your resume against the specific job requirements for better optimization.
+                  </p>
                 </div>
               </CardContent>
             </Card>
+          </div>
 
             {/* Generated Content */}
             <div className="lg:col-span-2">
