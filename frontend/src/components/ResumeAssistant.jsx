@@ -19,9 +19,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { resumeAPI } from '../services/api';
-// Import PDF parsing library
-import pdfParse from 'pdf-parse';
-import mammoth from 'mammoth';
 
 const ResumeAssistant = () => {
   const navigate = useNavigate();
