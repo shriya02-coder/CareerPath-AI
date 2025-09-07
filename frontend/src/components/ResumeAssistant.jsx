@@ -212,12 +212,13 @@ const ResumeAssistant = () => {
                       <Input placeholder="Period (e.g., 2022–Present)" value={job.period || ''} onChange={(e) => updateJobField(idx, 'period', e.target.value)} />
                     </div>
                     <div className="space-y-2">
-                      {job.bullets.map((b, bIdx) => (
-                        <Input key={bIdx} placeholder={`Bullet ${bIdx + 1}`} value={b} onChange={(e) => updateBullet(idx, bIdx, e.target.value)} />
-                      ))}
-                      <Button variant="outline" size="sm" onClick={() => addBullet(idx)} className="border-purple-200 text-purple-600">
-                        <Plus className="h-4 w-4 mr-1" /> Add Bullet
-                      </Button>
+                      <Textarea
+                        placeholder={`Paste bullets for ${job.role || 'this role'} (one per line)`}
+                        value={job.bulletsText}
+                        onChange={(e) => updateJobBulletsText(idx, e.target.value)}
+                        className="min-h-[120px]"
+                      />
+                      <div className="text-xs text-gray-500">Tip: Add one bullet per line. You can paste with • or ; as separators too.</div>
                     </div>
                   </div>
                 ))}
