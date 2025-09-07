@@ -493,8 +493,8 @@ const IdentityBuilder = () => {
                 }}
                 disabled={
                   (currentStep === 1 && (!getCurrentRole() || !formData.yearsExperience || !formData.education)) ||
-                  (currentStep === 2 && getAllSelectedSkills().length < 3) ||
-                  (currentStep === 3 && (!formData.interests || !formData.careerGoals))
+                  (currentStep === 2 && getAllSelectedSkills().length < 3)
+                  // Step 3 is now optional - no validation needed
                 }
               >
                 {currentStep === 3 ? 'Generate Statement' : 'Next'}
