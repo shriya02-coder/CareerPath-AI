@@ -452,39 +452,22 @@ const ResumeAssistant = () => {
 
                 <TabsContent value="tips">
                   <div className="space-y-6">
-                    {[{
-                      type: 'improvement',
-                      title: 'Quantify Your Achievements',
-                      description: 'Add specific numbers, percentages, or metrics to demonstrate your impact.',
-                      example: 'Instead of "Improved sales" try "Increased sales by 25% over 6 months"'
-                    },{
-                      type: 'keyword',
-                      title: 'Optimize for ATS',
-                      description: 'Include relevant keywords from the job description to pass applicant tracking systems.',
-                      example: 'Use exact terms from the job posting like "project management" instead of "managing projects"'
-                    },{
-                      type: 'action',
-                      title: 'Strengthen Action Verbs',
-                      description: 'Start bullet points with powerful action verbs to show leadership and initiative.',
-                      example: 'Use "Spearheaded," "Orchestrated," "Implemented" instead of "Responsible for"'
-                    }].map((suggestion, index) => (
+                    {(generatedContent.proTips && generatedContent.proTips.length > 0 ? generatedContent.proTips : [
+                      'Quantify achievements with metrics (e.g., +25%, -10 hours/week)',
+                      'Mirror top JD keywords across bullets and skills',
+                      'Lead with outcomes and ownership; avoid passive phrasing',
+                      'Group older roles; expand recent, relevant results',
+                      'Ensure tense consistency: present for current role, past for previous'
+                    ]).map((tip, index) => (
                       <div key={index} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm rounded-lg p-6">
                         <div className="flex items-start space-x-4">
                           <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
                             <Lightbulb className="h-5 w-5 text-white" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                              {suggestion.title}
-                            </h3>
-                            <p className="text-gray-600 mb-3">
-                              {suggestion.description}
+                            <p className="text-gray-700">
+                              {tip}
                             </p>
-                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3">
-                              <p className="text-sm text-gray-700">
-                                <strong>Example:</strong> {suggestion.example}
-                              </p>
-                            </div>
                           </div>
                         </div>
                       </div>
