@@ -447,8 +447,8 @@ const IdentityBuilder = () => {
                   }
                 }}
                 disabled={
-                  (currentStep === 1 && (!formData.currentRole || !formData.yearsExperience || !formData.education)) ||
-                  (currentStep === 2 && formData.selectedSkills.length < 3) ||
+                  (currentStep === 1 && (!getCurrentRole() || !formData.yearsExperience || !formData.education)) ||
+                  (currentStep === 2 && getAllSelectedSkills().length < 3) ||
                   (currentStep === 3 && (!formData.interests || !formData.careerGoals))
                 }
               >
