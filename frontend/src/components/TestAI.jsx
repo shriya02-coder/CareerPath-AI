@@ -23,9 +23,11 @@ const TestAI = () => {
     };
 
     try {
-      console.log('Testing AI API with:', testData);
+      console.log('🚀 Testing AI API with:', testData);
+      console.log('🔗 API URL:', 'http://localhost:8001/api/identity/generate');
+      
       const response = await identityAPI.generateStatement(testData);
-      console.log('AI Response:', response);
+      console.log('✅ AI Response received:', response);
       
       if (response.success) {
         setResult(response.statement);
@@ -33,7 +35,9 @@ const TestAI = () => {
         setError(`API Error: ${response.message}`);
       }
     } catch (err) {
-      console.error('Test AI Error:', err);
+      console.error('❌ Test AI Error:', err);
+      console.error('❌ Error Response:', err.response?.data);
+      console.error('❌ Error Request:', err.request);
       setError(`Connection Error: ${err.message}`);
     } finally {
       setLoading(false);
@@ -42,30 +46,37 @@ const TestAI = () => {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">AI Connection Test</h1>
+      <h1 className="text-2xl font-bold mb-4">🧪 AI Connection Test</h1>
       
-      <Button onClick={testAI} disabled={loading} className="mb-4">
-        {loading ? 'Testing...' : 'Test AI Connection'}
+      <Button 
+        onClick={testAI} 
+        disabled={loading} 
+        className="mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+      >
+        {loading ? '🔄 Testing AI...' : '🚀 Test Real AI Connection'}
       </Button>
       
       {error && (
         <div className="bg-red-50 border border-red-200 p-4 rounded mb-4">
-          <p className="text-red-700 font-semibold">Error:</p>
+          <p className="text-red-700 font-semibold">❌ Error:</p>
           <p className="text-red-600">{error}</p>
         </div>
       )}
       
       {result && (
         <div className="bg-green-50 border border-green-200 p-4 rounded mb-4">
-          <p className="text-green-700 font-semibold">Success! Generated Statement:</p>
-          <p className="text-green-600 mt-2">{result}</p>
+          <p className="text-green-700 font-semibold">✅ Success! Real AI Generated Statement:</p>
+          <p className="text-green-600 mt-2 italic">"{result}"</p>
         </div>
       )}
       
-      <div className="bg-gray-50 p-4 rounded">
-        <p className="text-sm text-gray-600">
-          This test page will help us debug the AI connection issue.
-          Open the browser console (F12) to see detailed logs.
+      <div className="bg-blue-50 p-4 rounded">
+        <p className="text-sm text-blue-600">
+          <strong>How this works:</strong><br/>
+          1. Frontend sends request to: http://localhost:8001/api/identity/generate<br/>
+          2. Backend processes with real AI (Emergent LLM Key)<br/>
+          3. AI returns personalized career statement<br/>
+          4. Check browser console (F12) for detailed logs
         </p>
       </div>
     </div>
